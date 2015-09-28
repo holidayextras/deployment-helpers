@@ -1,6 +1,6 @@
 #!/bin/bash -e
-APP_NAME="`cat ../../../package.json | jq '.name' | tr -d '"'`"
-CANDIDATE_VERSION=`cat ../../../package.json | jq '.version' | tr -d '"'`
+APP_NAME="`cat package.json | jq '.name' | tr -d '"'`"
+CANDIDATE_VERSION=`cat package.json | jq '.version' | tr -d '"'`
 REPO_OWNER="holidayextras"
 ENVIRONMENT=$1
 

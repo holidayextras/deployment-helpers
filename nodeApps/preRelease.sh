@@ -4,7 +4,7 @@ REPO_OWNER="holidayextras"
 # Get the last version from Github
 RELEASED_VERSION_STRING=`curl --user "${GHUSER}:${GHPASS}" https://api.github.com/repos/${REPO_OWNER}/${CIRCLE_PROJECT_REPONAME}/releases/latest | jq '.tag_name' | tr -d '"' | tr -d 'v'`
 # Get the version from the local package.json
-CANDIDATE_VERSION_STRING="`cat ../../../package.json | jq '.version' | tr -d '"' `"
+CANDIDATE_VERSION_STRING="`cat package.json | jq '.version' | tr -d '"' `"
 
 echo "Current Release: $RELEASED_VERSION_STRING"
 echo "Local Version: $CANDIDATE_VERSION_STRING"
