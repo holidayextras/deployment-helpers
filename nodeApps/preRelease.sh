@@ -1,8 +1,9 @@
 #!/bin/bash -e
 
 REPO_OWNER="holidayextras"
+APP_NAME="`cat package.json | jq '.name' | tr -d '"'`"
 # Get the last version from Github
-RELEASED_VERSION_STRING=`curl --user "${GHUSER}:${GHPASS}" https://api.github.com/repos/${REPO_OWNER}/${CIRCLE_PROJECT_REPONAME}/releases/latest | jq '.tag_name' | tr -d '"' | tr -d 'v'`
+RELEASED_VERSION_STRING=`curl --user "${GHUSER}:${GHPASS}" https://api.github.com/repos/${REPO_OWNER}/${APP_NAME}/releases/latest | jq '.tag_name' | tr -d '"' | tr -d 'v'`
 # Get the version from the local package.json
 CANDIDATE_VERSION_STRING="`cat package.json | jq '.version' | tr -d '"' `"
 
