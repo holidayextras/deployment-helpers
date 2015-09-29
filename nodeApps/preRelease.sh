@@ -3,7 +3,7 @@
 REPO_OWNER="holidayextras"
 APP_NAME="`cat package.json | grep -m 1 name | cut -d '"' -f 4`"
 # Get the last version from Github
-RELEASED_VERSION_STRING=`curl -s --user "${GHUSER}:${GHPASS}" https://api.github.com/repos/${REPO_OWNER}/${APP_NAME}/releases/latest | sed -E "s/^.*\"tag_name\"\:\"v([0-9\.]+)\".*$/\1/g"`
+RELEASED_VERSION_STRING=`git describe origin/master --tags | td -d "v"`
 # Get the version from the local package.json
 CANDIDATE_VERSION_STRING="`cat package.json | grep version | cut -d '"' -f 4`"
 
