@@ -1,5 +1,5 @@
 #!/bin/bash -e
-APP_NAME="`cat package.json | grep name | cut -d '"' -f 4`"
+APP_NAME="`cat package.json | grep -m 1 name | cut -d '"' -f 4`"
 CANDIDATE_VERSION=`cat package.json | grep version | cut -d '"' -f 4`
 REPO_OWNER="holidayextras"
 ENVIRONMENT=$1
