@@ -1,12 +1,13 @@
 #!/bin/bash -e
 
 REPO_OWNER="holidayextras"
-APP_NAME="`cat package.json | jq '.name' | tr -d '"'`"
+APP_NAME="`cat package.json | grep name | cut -d '"' -f 4`"
 # Get the last version from Github
 RELEASED_VERSION_STRING=`curl --user "${GHUSER}:${GHPASS}" https://api.github.com/repos/${REPO_OWNER}/${APP_NAME}/releases/latest | jq '.tag_name' | tr -d '"' | tr -d 'v'`
 # Get the version from the local package.json
-CANDIDATE_VERSION_STRING="`cat package.json | jq '.version' | tr -d '"' `"
+CANDIDATE_VERSION_STRING="`cat package.json | grep version | cut -d '"' -f 4`"
 
+echo "App Name: $APP_NAME"
 echo "Current Release: $RELEASED_VERSION_STRING"
 echo "Local Version: $CANDIDATE_VERSION_STRING"
 
