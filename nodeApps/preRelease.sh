@@ -3,7 +3,7 @@
 REPO_OWNER="holidayextras"
 APP_NAME="`cat package.json | grep -m 1 name | cut -d '"' -f 4`"
 # Get the last version from Github
-RELEASED_VERSION_STRING=`git describe origin/master --tags | td -d "v"`
+RELEASED_VERSION_STRING=`git describe origin/master --tags | tr -d "v"`
 # Get the version from the local package.json
 CANDIDATE_VERSION_STRING="`cat package.json | grep version | cut -d '"' -f 4`"
 
