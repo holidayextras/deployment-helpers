@@ -4,7 +4,7 @@ REPO_OWNER="holidayextras"
 APP_NAME="`cat package.json | grep -m 1 name | cut -d '"' -f 4`"
 # Get the last version from Git
 git fetch
-RELEASED_VERSION_STRING=`git describe --tags `git rev-list --tags --max-count=1` | tr -d "v"`
+RELEASED_VERSION_STRING=`git describe --tags \`git rev-list --tags --max-count=1\` | tr -d "v"`
 # Get the version from the local package.json
 CANDIDATE_VERSION_STRING="`cat package.json | grep version | cut -d '"' -f 4`"
 
@@ -16,7 +16,7 @@ echo "Local Version: $CANDIDATE_VERSION_STRING"
 RELEASED_VERSION=(${RELEASED_VERSION_STRING//./ })
 CANDIDATE_VERSION=(${CANDIDATE_VERSION_STRING//./ })
 
-if [ $RELEASED_VERSION = "null" ]; then
+if [ -z $RELEASED_VERSION ]; then
 	echo "No release to date"
 else
 	# Check if the major is less than
