@@ -22,7 +22,7 @@ echo "Local Version: $CANDIDATE_VERSION_STRING"
 RELEASED_VERSION=(${RELEASED_VERSION_STRING//./ })
 CANDIDATE_VERSION=(${CANDIDATE_VERSION_STRING//./ })
 
-if [ $GIT_CHANGED = "true" ]; then
+if [[ $GIT_CHANGED = "false" || -n $CI ]]; then
 	echo "Checking Release"
 	if [ -z $RELEASED_VERSION ]; then
 		echo "No release to date"
