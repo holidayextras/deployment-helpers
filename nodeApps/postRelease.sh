@@ -5,7 +5,7 @@ REPO_OWNER="holidayextras"
 ENVIRONMENT=$1
 NO_METRIC=$2
 
-if [ $ENVIRONMENT = "production" ]; then
+if [ $ENVIRONMENT = "production" ] || [ $ENVIRONMENT = "master" ]; then
 	# Tag this deploy and make a release in github
 	curl --user "${GHUSER}:${GHPASS}" --data "{\"tag_name\": \"v${CANDIDATE_VERSION}\",\"target_commitish\": \"master\",\"name\": \"v${CANDIDATE_VERSION}\",\"body\": \"Production release by @${CIRCLE_USERNAME} (via build: [${CIRCLE_BUILD_NUM}](https://circleci.com/gh/${REPO_OWNER}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BUILD_NUM})).\",\"draft\": false,\"prerelease\": false}" https://api.github.com/repos/${REPO_OWNER}/${CIRCLE_PROJECT_REPONAME}/releases
 fi
