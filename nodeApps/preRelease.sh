@@ -18,14 +18,16 @@ echo "App Name: $APP_NAME"
 echo "Repo Changes: $GIT_CHANGED"
 echo "Current Release: $RELEASED_VERSION_STRING"
 echo "Local Version: $CANDIDATE_VERSION_STRING"
+echo "GIT_CHANGED: $GIT_CHANGED"
 # Split the string up into an array
 RELEASED_VERSION=(${RELEASED_VERSION_STRING//./ })
 CANDIDATE_VERSION=(${CANDIDATE_VERSION_STRING//./ })
 
-if [[ $GIT_CHANGED = "false" || -n $CI ]]; then
+if [[ $GIT_CHANGED = "true" || -n $CI ]]; then
 	echo "Checking Release"
 	if [ -z $RELEASED_VERSION ]; then
 		echo "No release to date"
+		exit 0
 	else
 		# Check if the major is less than
 		if [ ${CANDIDATE_VERSION[0]} -lt ${RELEASED_VERSION[0]} ]; then
