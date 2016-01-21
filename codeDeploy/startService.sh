@@ -5,7 +5,7 @@ if [ ${APPLICATION_NAME} = "themeBlueprint" ] || [ ${APPLICATION_NAME} = "theatr
   SERVICE="the-wall"
 fi
 
-if [ ${APPLICATION_NAME} = "paultons-seo" ] ]; then
+if [ ${APPLICATION_NAME} = "paultons-seo" ]; then
   SERVICE="apache2"
 fi
 
