@@ -5,14 +5,14 @@ if [ ${APPLICATION_NAME} = "themeBlueprint" ] || [ ${APPLICATION_NAME} = "theatr
   SERVICE="the-wall"
 fi
 
-if [ ${APPLICATION_NAME} = "paultons-seo" ]; then
-  SERVICE="apache2"
-fi
-
 file="/etc/init/${SERVICE}.conf"
 if [ ! -f "$file" ]; then
   # fall back to the default
   SERVICE="primaryApplication"
+fi
+
+if [ ${APPLICATION_NAME} = "paultons-seo" ]; then
+  SERVICE="apache2"
 fi
 
 echo "Restarting ${SERVICE} (${APPLICATION_NAME})"
