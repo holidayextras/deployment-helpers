@@ -15,5 +15,8 @@ if [ ${APPLICATION_NAME} = "paultons-seo" ]; then
   SERVICE="apache2"
 fi
 
-echo "Starting ${SERVICE} (${APPLICATION_NAME})"
-service $SERVICE start
+# Check the service exists
+if service --status-all | grep -Fq $SERVICE; then
+	echo "Restarting ${SERVICE} (${APPLICATION_NAME})"
+	service $SERVICE start
+fi
