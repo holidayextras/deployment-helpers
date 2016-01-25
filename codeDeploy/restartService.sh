@@ -11,13 +11,13 @@ if [ ! -f "$file" ]; then
   SERVICE="primaryApplication"
 fi
 
-if [ ${APPLICATION_NAME} = "paultons-seo" ]; then
+if [ ${SERVICE} = "paultons-seo" ]; then
   SERVICE="apache2"
+  if service --status-all | grep -Fq $SERVICE; then
+    echo "Restarting ${SERVICE} (${APPLICATION_NAME})"
+    service $SERVICE restart  	
+  fi
+else
+    echo "Restarting ${SERVICE} (${APPLICATION_NAME})"
+    service $SERVICE restart  		
 fi
-
-# Check the service exists
-if service --status-all | grep -Fq $SERVICE; then
-	echo "Restarting ${SERVICE} (${APPLICATION_NAME})"
-	service $SERVICE restart
-fi
-	
