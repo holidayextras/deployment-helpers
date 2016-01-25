@@ -1,5 +1,5 @@
 #!/bin/bash -e
-SERVICE='apache2'
+SERVICE=${APPLICATION_NAME}
 
 if [ ${APPLICATION_NAME} = "themeBlueprint" ] || [ ${APPLICATION_NAME} = "theatreBlueprint" ]; then
   SERVICE="the-wall"
