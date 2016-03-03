@@ -10,7 +10,7 @@ if [ "${GITHUB_USER}" == "" ] || [ "${GITHUB_API_TOKEN}" == "" ]; then
 fi
 
 # Check if we are on the correct branch to release from
-RELEASE_BRANCH="master"
+RELEASE_BRANCH="shared-script"
 if [ "${TRAVIS_BRANCH}" != "" ]; then
   CURRENT_BRANCH=${TRAVIS_BRANCH}
 else
