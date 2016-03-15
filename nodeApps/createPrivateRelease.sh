@@ -71,4 +71,17 @@ echo "Message: ${MESSAGE}"
 # Tag this deploy and make a release in github
 curl -u "${GITHUB_USER}:${GITHUB_API_TOKEN}" --data "{\"tag_name\": \"v${THIS_VERSION}\",\"target_commitish\": \"${RELEASE_BRANCH}\",\"name\": \"v${THIS_VERSION}\",\"body\": \"${MESSAGE}\",\"draft\": false,\"prerelease\": false}" https://api.github.com/repos/${APP_NAME}/releases
 
+
+# Now update the major release tag
+
+THIS_MAJOR_VERSION=`echo ${THIS_VERSION} | grep -E -o '^[0-9]+'`
+echo "Major version: ${THIS_MAJOR_VERSION}"
+
+# Delete current tag if any
+curl -u "${GITHUB_USER}:${GITHUB_API_TOKEN}" -X DELETE https://api.github.com/repos/${APP_NAME}/git/refs/tags/v${THIS_MAJOR_VERSION}-latest
+
+# Create a new updated tag
+CURRENT_SHA=`git rev-parse HEAD`
+curl -u "${GITHUB_USER}:${GITHUB_API_TOKEN}" --data "{\"ref\": \"refs/tags/v${THIS_MAJOR_VERSION}-latest\",\"sha\": \"${CURRENT_SHA}\"}" https://api.github.com/repos/${APP_NAME}/git/refs
+
 echo -e "\n\nDone."
