@@ -1,5 +1,5 @@
 {
-  "name": "deployment-helpers",
+  "name": "@holidayextras/deployment-helpers",
   "version": "1.3.0",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "main": "",
