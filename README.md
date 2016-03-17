@@ -1,5 +1,7 @@
 # Deployment Helpers
 
+This project holds various deployment scripts that are used with AWS CodeDeploy and releasing our private NPM modules.
+
 ## Node Apps
 
 ### `createPrivateRelease.sh`
