@@ -24,7 +24,7 @@ fi
 
 # Check if we have not release this version already
 git pull
-LAST_TAG=`git tag --list | grep '[0-9]' | sort | tail -n 1`
+LAST_TAG=`git tag --list | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort | tail -n 1`
 echo "Last tag: ${LAST_TAG}"
 THIS_VERSION=`cat package.json | grep version | cut -d '"' -f 4`
 echo "This version: ${THIS_VERSION}"
