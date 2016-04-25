@@ -26,7 +26,7 @@ fi
 git pull
 LAST_TAG=`git tag --list | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort | tail -n 1`
 echo "Last tag: ${LAST_TAG}"
-THIS_VERSION=`cat package.json | grep version | cut -d '"' -f 4`
+THIS_VERSION=`cat package.json | grep version | head -n 1 | cut -d '"' -f 4`
 echo "This version: ${THIS_VERSION}"
 if [ "v${THIS_VERSION}" == "${LAST_TAG}" ]; then
   echo "WARNING: Version not updated"
@@ -68,9 +68,13 @@ elif [ "${TRAVIS_JOB_NUMBER}" != "" ]; then
 fi
 echo "Message: ${MESSAGE}"
 
-# Tag this deploy and make a release in github
-curl -u "${GITHUB_USER}:${GITHUB_API_TOKEN}" --data "{\"tag_name\": \"v${THIS_VERSION}\",\"target_commitish\": \"${RELEASE_BRANCH}\",\"name\": \"v${THIS_VERSION}\",\"body\": \"${MESSAGE}\",\"draft\": false,\"prerelease\": false}" https://api.github.com/repos/${APP_NAME}/releases
+CURRENT_SHA=`git rev-parse HEAD`
+echo "Latest commit is: ${CURRENT_SHA}"
 
+# Tag this deploy and make a release in github
+RELEASE_JSON="{\"tag_name\": \"v${THIS_VERSION}\",\"target_commitish\": \"${CURRENT_SHA}\",\"name\": \"v${THIS_VERSION}\",\"body\": \"${MESSAGE}\",\"draft\": false,\"prerelease\": false}"
+echo "Release JSON: ${RELEASE_JSON}"
+curl -u "${GITHUB_USER}:${GITHUB_API_TOKEN}" --data "${RELEASE_JSON}" https://api.github.com/repos/${APP_NAME}/releases
 
 # Now update the major release tag
 
@@ -81,7 +85,6 @@ echo "Major version: ${THIS_MAJOR_VERSION}"
 curl -u "${GITHUB_USER}:${GITHUB_API_TOKEN}" -X DELETE https://api.github.com/repos/${APP_NAME}/git/refs/tags/v${THIS_MAJOR_VERSION}-latest
 
 # Create a new updated tag
-CURRENT_SHA=`git rev-parse HEAD`
 curl -u "${GITHUB_USER}:${GITHUB_API_TOKEN}" --data "{\"ref\": \"refs/tags/v${THIS_MAJOR_VERSION}-latest\",\"sha\": \"${CURRENT_SHA}\"}" https://api.github.com/repos/${APP_NAME}/git/refs
 
 echo -e "\n\nDone."
