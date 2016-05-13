@@ -1,11 +1,11 @@
 {
   "name": "deployment-helpers",
-  "version": "1.4.3",
+  "version": "1.5.0",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "main": "",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "postrelease": "nodeApps/postRelease.sh"
+    "release": "nodeApps/postRelease.sh"
   },
   "repository": {
     "type": "git",
