@@ -4,7 +4,8 @@
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "main": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postrelease": "nodeApps/postRelease.sh"
   },
   "repository": {
     "type": "git",
