@@ -1,5 +1,7 @@
 # Deployment Helpers
 
+This project holds various deployment scripts that are used with AWS CodeDeploy and releasing our private NPM modules.
+
 ## Node Apps
 
 ### `createPrivateRelease.sh`
@@ -35,3 +37,7 @@ Use and configure with package.json:
     }
   },
 ```
+
+## Releasing to NPM
+
+We currently use a combination of npm version 1 and above, because of this we can not scope the package name in the `package.json`, when a new NPM release is required please add the scope to the package name (`@holidayextras/deployment-helpers`) manually before running `npm publish`.
