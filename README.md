@@ -16,7 +16,7 @@ Use and configure with package.json:
 
 ```
   "scripts": {
-    "install:cached": "git clone https://github.com/holidayextras/deployment-helpers.git && ./deployment-helpers/nodeApps/cachedInstallModules.sh"
+    "install:cached": "rm -rf ./deployment-helpers && git clone https://github.com/holidayextras/deployment-helpers.git && ./deployment-helpers/nodeApps/cachedInstallModules.sh"
   },
   "config": {
     "nodeModuleCaching": {
