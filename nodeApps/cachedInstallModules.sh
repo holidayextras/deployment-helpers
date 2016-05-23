@@ -34,12 +34,10 @@ STRATEGY=$npm_package_config_nodeModuleCaching_strategy
 
 NPM_VERSION=$npm_package_config_nodeModuleCaching_npmVersion
 
-function update_npm_if_required {
-  if [ -n "$NPM_VERSION" ]; then
-    echo "npm caching: installing npm@$NPM_VERSION"
-    npm install -g npm@$NPM_VERSION
-  fi
-}
+if [ -n "$NPM_VERSION" ]; then
+  echo "npm caching: installing npm@$NPM_VERSION"
+  npm install -g npm@$NPM_VERSION
+fi
 
 if [[ "$STRATEGY" == "prune" || "$STRATEGY" == "clear" ]]; then
   MODULE_HASH_FILE="./node_modules/modules.sha"
@@ -54,7 +52,6 @@ if [[ "$STRATEGY" == "prune" || "$STRATEGY" == "clear" ]]; then
   if [ "$CACHE_SHA" == "$CURRENT_SHA" ]; then
     echo "npm caching: skipping install step"
   else
-    update_npm_if_required
 
     if [ "$STRATEGY" == "clear" ]; then
       echo "npm caching: installing modules into empty directory"
@@ -74,7 +71,5 @@ if [[ "$STRATEGY" == "prune" || "$STRATEGY" == "clear" ]]; then
 
 else
   echo "npm caching: defaulting to `npm install`"
-
-  update_npm_if_required
   npm install
 fi
