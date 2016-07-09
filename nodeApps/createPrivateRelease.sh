@@ -39,12 +39,15 @@ if [ -d dist ]; then
   git rm dist -r
 fi
 npm run build
-git add dist
-git status
-if [[ -n $(git status -s) ]] ; then
-  echo "Updated dist needs committing"
-  git commit -m "Added new dist for version ${THIS_VERSION}"
-  git push origin ${RELEASE_BRANCH}
+# If a new dist dir has been built we may need to commit it
+if [ -d dist ]; then
+  git add dist
+  git status
+  if [[ -n $(git status -s) ]] ; then
+    echo "Updated dist needs committing"
+    git commit -m "Added new dist for version ${THIS_VERSION}"
+    git push origin ${RELEASE_BRANCH}
+  fi
 fi
 
 # Determine name of the project
