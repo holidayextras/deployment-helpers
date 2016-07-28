@@ -7,6 +7,17 @@ set -e
 if [ "${GITHUB_USER}" == "" ] || [ "${GITHUB_API_TOKEN}" == "" ]; then
   echo "ERROR: GitHub credentials not set."
   exit 1
+elif [ "${CIRCLECI}" != "" ] && [ "${GITHUB_EMAIL}" == "" ]; then
+  echo "ERROR: GitHub Email required for CircleCI"
+  exit 3
+fi
+
+# Setup git CLI if needed
+if [ "`git config --get user.email`" == "" ]; then
+  git config user.email ${GITHUB_EMAIL}
+fi
+if [ "`git config --get user.name`" == "" ]; then
+  git config user.name ${GITHUB_USER}
 fi
 
 # Check if we are on the correct branch to release from
