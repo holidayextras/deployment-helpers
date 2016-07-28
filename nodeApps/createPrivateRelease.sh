@@ -12,9 +12,11 @@ elif [ "${CIRCLECI}" != "" ] && [ "${GITHUB_EMAIL}" == "" ]; then
   exit 3
 fi
 
-# Setup git CLI for Circle
-if [ "${CIRCLECI}" != "" ]; then
+# Setup git CLI if needed
+if [ `git config --get user.email` == "" ]; then
   git config user.email ${GITHUB_EMAIL}
+fi
+if [ `git config --get user.name` == "" ]; then
   git config user.name ${GITHUB_USER}
 fi
 
