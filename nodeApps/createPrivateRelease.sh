@@ -7,13 +7,14 @@ set -e
 if [ "${GITHUB_USER}" == "" ] || [ "${GITHUB_API_TOKEN}" == "" ]; then
   echo "ERROR: GitHub credentials not set."
   exit 1
-elif [ "${CIRCLECI}" != "" ] && [ "${GITHUB_EMAIL}" == "" ]; then
-  echo "ERROR: GitHub Email required for CircleCI"
-  exit 3
 fi
 
 # Setup git CLI if needed
 if [ "`git config --get user.email`" == "" ]; then
+  if [ "${GITHUB_EMAIL}" == "" ]; then
+    echo "ERROR: GitHub Email required for git CLI setup"
+    exit 3
+  fi
   git config user.email ${GITHUB_EMAIL}
 fi
 if [ "`git config --get user.name`" == "" ]; then
