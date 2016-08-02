@@ -128,9 +128,9 @@ $SAFE_DEBUG_ECHO curl -u "${GITHUB_USER}:${GITHUB_API_TOKEN}" --data "{\"ref\": 
 # Add a deployment counter in the metrics platform (graphite)
 if [ "$ENVIRONMENT" != "" } && [ "${GRAPHITE_API_KEY}" != "" ] && [ -z $NO_METRIC ]; then
   if [ $DEBUG != "" ]; then
-	  echo "${GRAPHITE_API_KEY}.counters.${BASE_NAME}.${ENVIRONMENT}.inf.deployment 1 |"
+    echo "${GRAPHITE_API_KEY}.counters.${BASE_NAME}.${ENVIRONMENT}.inf.deployment 1 |"
   fi
-	echo "${GRAPHITE_API_KEY}.counters.${BASE_NAME}.${ENVIRONMENT}.inf.deployment 1" | $SAFE_DEBUG_ECHO nc ${GRAPHITE_ENDPOINT_PREFIX}.carbon.hostedgraphite.com 2003
+  echo "${GRAPHITE_API_KEY}.counters.${BASE_NAME}.${ENVIRONMENT}.inf.deployment 1" | $SAFE_DEBUG_ECHO nc ${GRAPHITE_ENDPOINT_PREFIX}.carbon.hostedgraphite.com 2003
 fi
 
 echo -e "\n\nDone."
