@@ -100,7 +100,7 @@ fi
 # Set a sensible release message
 MESSAGE="NPM release by developer."
 if [ "${CIRCLE_BUILD_NUM}" != "" ]; then
-  MESSAGE="NPM release via CI build: [${CIRCLE_BUILD_NUM}](https://circleci.com/gh/${APP_NAME}/${CIRCLE_BUILD_NUM})."
+  MESSAGE="NPM release by ${CIRCLE_USERNAME} via CI build: [${CIRCLE_BUILD_NUM}](https://circleci.com/gh/${APP_NAME}/${CIRCLE_BUILD_NUM})."
 elif [ "${TRAVIS_JOB_NUMBER}" != "" ]; then
   MESSAGE="NPM release via CI build: [${TRAVIS_JOB_ID}](https://travis-ci.com/${APP_NAME}/jobs/${TRAVIS_JOB_ID})."
 fi
