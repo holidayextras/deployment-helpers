@@ -6,7 +6,7 @@ This project holds various deployment scripts that are used with AWS CodeDeploy 
 
 ### `createPrivateRelease.sh`
 
-This will check if the `package.json` version has been updated for a project and then create a new release on github after running `npm build` and commiting any changed release assets in the `dist` directory.A
+This will check if the `package.json` version has been updated for a project and then create a new release on github after running `npm build` and commiting any changed release assets in the `dist` directory.
 Steps:
  - Check credentials
  - Check we are on the release branch
