@@ -6,8 +6,6 @@ Configure the CI worker to export a Github access token with the relevant permis
 
 ```
 # 1. Find commit ref
-COMMIT_HASH=$TRAVIS_COMMIT
-# (or)
 COMMIT_HASH=$CIRCLE_SHA1
 # (or)
 COMMIT_HASH=`ci_get_interesting_commit.sh master`
