@@ -50,8 +50,7 @@ if [ -d dist ]; then
   git rm dist -r
 fi
 
-HASBUILDSCRIPT=`npm run | grep '^  build$'`
-if [ ! -z "${HASBUILDSCRIPT}" ]; then
+if [ ! -z `npm run | grep '^  build$'` ]; then
   npm run build
 fi
 
