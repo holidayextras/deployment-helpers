@@ -67,7 +67,11 @@ git branch
 if [ -d dist ]; then
   git rm dist -r
 fi
-npm run build || echo "npm run build failed, but maybe there is no build script?"
+
+if [ ! -z `npm run | grep '^  build$'` ]; then
+  npm run build
+fi
+
 # If a new dist dir has been built we may need to commit it
 if [ -d dist ]; then
   git add dist
