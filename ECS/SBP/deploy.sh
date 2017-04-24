@@ -25,7 +25,7 @@ SERVICE_NAME="`cat package.json | grep -m 1 name | cut -d '"' -f 4`"
 CLUSTER_NAME="SBP-Cluster-1"
 DESIRED_COUNT=1
 IMAGE_TAG=${CIRCLE_SHA1:-latest}
-TEMPLATE_FILE="ecs-task-definition"
+TEMPLATE_FILE="$(dirname "$0")/ecs-task-definition"
 $(aws ecr get-login --region eu-west-1)
 ECR_REPOS=`aws ecr describe-repositories --output text --query repositories[*].repositoryName`
 
@@ -38,7 +38,7 @@ docker tag ${SERVICE_NAME} ${AWS_ACCOUNT_ID}.dkr.ecr.eu-west-1.amazonaws.com/${S
 docker push ${AWS_ACCOUNT_ID}.dkr.ecr.eu-west-1.amazonaws.com/${SERVICE_NAME}:${IMAGE_TAG}
 
 if [ -n "${PORT}" ]; then
-	TEMPLATE_FILE="ecs-task-definition-exposedPorts"
+	TEMPLATE_FILE="$(dirname "$0")/ecs-task-definition-exposedPorts"
 fi
 sed -e "s;%SERVICE_NAME%;${SERVICE_NAME};g" -e "s;%IMAGE_TAG%;${IMAGE_TAG};g" -e "s;%PORT%;${PORT};g" -e "s;%AWS_ACCOUNT_ID%;${AWS_ACCOUNT_ID};g" -e "s;%CPU%;${CPU};g" -e "s;%MEMORY%;${MEMORY};g" ${TEMPLATE_FILE}.json > taskDefinition.json
 echo "TASK: `aws ecs register-task-definition --family ${SERVICE_NAME} --cli-input-json file://taskDefinition.json --query taskDefinition.status --output text`"
