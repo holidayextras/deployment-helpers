@@ -4,6 +4,19 @@
 
 set -e
 
+ENVIRONMENT=$1
+NO_METRIC=$2
+if [ $DEBUG != "" ]; then
+  SAFE_DEBUG_ECHO=echo
+fi
+
+# allow the core standard of $GITHUB_USER:$GITHUB_API_TOKEN or shortbreaks' $GHUSER:$GHPASS
+if [ -z $GITHUB_USER ]; then
+  GITHUB_USER=$GHUSER
+fi
+if [ -z $GITHUB_API_TOKEN ]; then
+  GITHUB_API_TOKEN=$GHPASS
+fi
 if [ "${GITHUB_USER}" == "" ] || [ "${GITHUB_API_TOKEN}" == "" ]; then
   echo "ERROR: GitHub credentials not set."
   exit 1
@@ -21,7 +34,9 @@ if [ "`git config --get user.name`" == "" ]; then
 fi
 
 # Check if we are on the correct branch to release from
-RELEASE_BRANCH="master"
+if [ "${RELEASE_BRANCH}" == "" ]; then
+  RELEASE_BRANCH="master"
+fi
 if [ "${TRAVIS_BRANCH}" != "" ]; then
   CURRENT_BRANCH=${TRAVIS_BRANCH}
 else
@@ -37,7 +52,10 @@ fi
 git pull
 LAST_TAG=`git tag --list | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort | tail -n 1`
 echo "Last tag: ${LAST_TAG}"
-THIS_VERSION=`cat package.json | grep version | head -n 1 | cut -d '"' -f 4`
+THIS_VERSION=${npm_package_version}
+if [ "v${THIS_VERSION}" == "" ]; then
+  THIS_VERSION=`cat package.json | grep version | head -n 1 | cut -d '"' -f 4`
+fi
 echo "This version: ${THIS_VERSION}"
 if [ "v${THIS_VERSION}" == "${LAST_TAG}" ]; then
   echo "WARNING: Version not updated"
@@ -66,7 +84,13 @@ if [ -d dist ]; then
 fi
 
 # Determine name of the project
-REPO_OWNER="holidayextras"
+REPO_OWNER=`echo "${npm_package_repository_url}" | cut -d/ -f4`
+# if this has been run as an npm script then we have everything we need, but...
+if [ -z $REPO_OWNER ]; then
+  echo could not get env vars, are you running this as an npm script?
+  # imo we should die here but, for backward compatibility
+  REPO_OWNER="holidayextras"
+fi
 if [ "${CIRCLE_BUILD_NUM}" != "" ]; then
   APP_NAME="${REPO_OWNER}/${CIRCLE_PROJECT_REPONAME}"
 elif [ "${TRAVIS_JOB_NUMBER}" != "" ]; then
@@ -80,7 +104,7 @@ fi
 # Set a sensible release message
 MESSAGE="NPM release by developer."
 if [ "${CIRCLE_BUILD_NUM}" != "" ]; then
-  MESSAGE="NPM release via CI build: [${CIRCLE_BUILD_NUM}](https://circleci.com/gh/${APP_NAME}/${CIRCLE_BUILD_NUM})."
+  MESSAGE="NPM release by ${CIRCLE_USERNAME} via CI build: [${CIRCLE_BUILD_NUM}](https://circleci.com/gh/${APP_NAME}/${CIRCLE_BUILD_NUM})."
 elif [ "${TRAVIS_JOB_NUMBER}" != "" ]; then
   MESSAGE="NPM release via CI build: [${TRAVIS_JOB_ID}](https://travis-ci.com/${APP_NAME}/jobs/${TRAVIS_JOB_ID})."
 fi
@@ -92,7 +116,7 @@ echo "Latest commit is: ${CURRENT_SHA}"
 # Tag this deploy and make a release in github
 RELEASE_JSON="{\"tag_name\": \"v${THIS_VERSION}\",\"target_commitish\": \"${CURRENT_SHA}\",\"name\": \"v${THIS_VERSION}\",\"body\": \"${MESSAGE}\",\"draft\": false,\"prerelease\": false}"
 echo "Release JSON: ${RELEASE_JSON}"
-curl -u "${GITHUB_USER}:${GITHUB_API_TOKEN}" --data "${RELEASE_JSON}" https://api.github.com/repos/${APP_NAME}/releases
+$SAFE_DEBUG_ECHO curl -u "${GITHUB_USER}:${GITHUB_API_TOKEN}" --data "${RELEASE_JSON}" https://api.github.com/repos/${APP_NAME}/releases
 
 # Now update the major release tag
 
@@ -100,9 +124,17 @@ THIS_MAJOR_VERSION=`echo ${THIS_VERSION} | grep -E -o '^[0-9]+'`
 echo "Major version: ${THIS_MAJOR_VERSION}"
 
 # Delete current tag if any
-curl -u "${GITHUB_USER}:${GITHUB_API_TOKEN}" -X DELETE https://api.github.com/repos/${APP_NAME}/git/refs/tags/v${THIS_MAJOR_VERSION}-latest
+$SAFE_DEBUG_ECHO curl -u "${GITHUB_USER}:${GITHUB_API_TOKEN}" -X DELETE https://api.github.com/repos/${APP_NAME}/git/refs/tags/v${THIS_MAJOR_VERSION}-latest
 
 # Create a new updated tag
-curl -u "${GITHUB_USER}:${GITHUB_API_TOKEN}" --data "{\"ref\": \"refs/tags/v${THIS_MAJOR_VERSION}-latest\",\"sha\": \"${CURRENT_SHA}\"}" https://api.github.com/repos/${APP_NAME}/git/refs
+$SAFE_DEBUG_ECHO curl -u "${GITHUB_USER}:${GITHUB_API_TOKEN}" --data "{\"ref\": \"refs/tags/v${THIS_MAJOR_VERSION}-latest\",\"sha\": \"${CURRENT_SHA}\"}" https://api.github.com/repos/${APP_NAME}/git/refs
+
+# Add a deployment counter in the metrics platform (graphite)
+if [ "$ENVIRONMENT" != "" } && [ "${GRAPHITE_API_KEY}" != "" ] && [ -z $NO_METRIC ]; then
+  if [ $DEBUG != "" ]; then
+    echo "${GRAPHITE_API_KEY}.counters.${BASE_NAME}.${ENVIRONMENT}.inf.deployment 1 |"
+  fi
+  echo "${GRAPHITE_API_KEY}.counters.${BASE_NAME}.${ENVIRONMENT}.inf.deployment 1" | $SAFE_DEBUG_ECHO nc ${GRAPHITE_ENDPOINT_PREFIX}.carbon.hostedgraphite.com 2003
+fi
 
 echo -e "\n\nDone."
