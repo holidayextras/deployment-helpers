@@ -258,12 +258,6 @@ autoscaling_enter_standby() {
     local instance_id=$1
     local asg_name=${2}
 
-    echo "****"
-    echo "$HANDLE_PROCS"
-    echo "----"
-    echo [ "$HANDLE_PROCS" = "true" ]
-    echo "****"
-
     msg "Checking if this instance has already been moved in the Standby state"
     local instance_state=$(get_instance_state_asg $instance_id)
     if [ $? != 0 ]; then
@@ -271,21 +265,15 @@ autoscaling_enter_standby() {
         return 1
     fi
 
-    echo "2"
-
     if [ "$instance_state" == "Standby" ]; then
         msg "Instance is already in Standby; nothing to do."
         return 0
     fi
 
-    echo "3"
-
     if [ "$instance_state" == "Pending:Wait" ]; then
         msg "Instance is Pending:Wait; nothing to do."
         return 0
     fi
-
-    echo "4"
 
     if [ "$HANDLE_PROCS" = "true" ]; then
         msg "Checking ASG ${asg_name} suspended processes"
@@ -294,8 +282,6 @@ autoscaling_enter_standby() {
         # Suspend troublesome processes while deploying
         suspend_processes
     fi
-
-    echo "5"
 
     msg "Checking to see if ASG ${asg_name} will let us decrease desired capacity"
     local min_desired=$($AWS_CLI autoscaling describe-auto-scaling-groups \
