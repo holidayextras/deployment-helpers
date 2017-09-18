@@ -345,6 +345,7 @@ autoscaling_enter_standby() {
             # Resume processes, except for the ones suspended before deployment
             resume_processes
         fi
+        return 1
     fi
 
     return 0
