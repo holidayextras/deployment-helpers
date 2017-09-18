@@ -307,6 +307,10 @@ autoscaling_enter_standby() {
             --min-size $new_min)
         if [ $? != 0 ]; then
             msg "Failed to reduce ASG ${asg_name}'s minimum size to $new_min. Cannot put this instance into Standby."
+            if [ "$HANDLE_PROCS" = "true" ]; then
+                # Resume processes, except for the ones suspended before deployment
+                resume_processes
+            fi
             return 1
         else
             msg "ASG ${asg_name}'s minimum size has been decremented, creating flag in file $FLAGFILE"
@@ -325,6 +329,10 @@ autoscaling_enter_standby() {
         --should-decrement-desired-capacity
     if [ $? != 0 ]; then
         msg "Failed to put instance $instance_id into Standby for ASG ${asg_name}."
+        if [ "$HANDLE_PROCS" = "true" ]; then
+            # Resume processes, except for the ones suspended before deployment
+            resume_processes
+        fi
         return 1
     fi
 
@@ -333,7 +341,10 @@ autoscaling_enter_standby() {
     if [ $? != 0 ]; then
         local wait_timeout=$(($WAITER_INTERVAL * $WAITER_ATTEMPTS))
         msg "Instance $instance_id did not make it to standby after $wait_timeout seconds"
-        return 1
+        if [ "$HANDLE_PROCS" = "true" ]; then
+            # Resume processes, except for the ones suspended before deployment
+            resume_processes
+        fi
     fi
 
     return 0
@@ -351,6 +362,10 @@ autoscaling_exit_standby() {
     local instance_state=$(get_instance_state_asg $instance_id)
     if [ $? != 0 ]; then
         msg "Unable to get this instance's lifecycle state."
+        if [ "$HANDLE_PROCS" = "true" ]; then
+            # Resume processes, except for the ones suspended before deployment
+            resume_processes
+        fi
         return 1
     fi
 
@@ -371,6 +386,10 @@ autoscaling_exit_standby() {
 
     if [ $? != 0 ]; then
         msg "Failed to put instance $instance_id back into InService for ASG ${asg_name}."
+        if [ "$HANDLE_PROCS" = "true" ]; then
+            # Resume processes, except for the ones suspended before deployment
+            resume_processes
+        fi
         return 1
     fi
 
@@ -379,6 +398,10 @@ autoscaling_exit_standby() {
     if [ $? != 0 ]; then
         local wait_timeout=$(($WAITER_INTERVAL * $WAITER_ATTEMPTS))
         msg "Instance $instance_id did not make it to InService after $wait_timeout seconds"
+        if [ "$HANDLE_PROCS" = "true" ]; then
+            # Resume processes, except for the ones suspended before deployment
+            resume_processes
+        fi
         return 1
     fi
 
@@ -400,6 +423,10 @@ autoscaling_exit_standby() {
         if [ $? != 0 ]; then
             msg "Failed to increase ASG ${asg_name}'s minimum size to $new_min."
             remove_flagfile
+            if [ "$HANDLE_PROCS" = "true" ]; then
+                # Resume processes, except for the ones suspended before deployment
+                resume_processes
+            fi
             return 1
         else
             msg "Successfully incremented ASG ${asg_name}'s minimum size"
