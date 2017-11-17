@@ -9,6 +9,7 @@ const git = require('simple-git')()
 const releaseBranch = process.env.releaseBranch || 'staging'
 const name = process.env.npm_package_name
 const version = process.env.npm_package_version
+const distPath = path.resolve(process.cwd(), '/dist')
 
 const checkPrerequisites = callback => {
   if (!process.env.npm_package_name) return callback('ERROR: run this as an npm script (npm run release)')
@@ -43,7 +44,7 @@ const checkBranch = callback => {
 }
 
 const checkAlreadyReleased = callback => {
-  const fullPath = path.resolve(__dirname, `../dist/${name}.min.${version}.js`)
+  const fullPath = path.resolve(`${distPath}/${name}.min.${version}.js`)
   if (fs.existsSync(fullPath)) {
     return callback(`Already exported ${name}.min.${version}.js`)
   }
@@ -67,8 +68,8 @@ const getSignature = (file, callback) => {
   })
 }
 
-const getSignedStagingFile = getSignature.bind(null, `${name}.staging.min.js`)
-const getSignedProductionFile = getSignature.bind(null, `${name}.min.js`)
+const getSignedStagingFile = getSignature.bind(null, `${distPath}/${name}.staging.min.js`)
+const getSignedProductionFile = getSignature.bind(null, `${distPath}/${name}.min.js`)
 
 const updateChangelog = (versionedFile, signature, callback) => {
   fs.readFile('CHANGELOG.md', 'utf-8', (readErr, contents) => {
