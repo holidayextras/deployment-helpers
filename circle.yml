@@ -1,0 +1,17 @@
+machine:
+  node:
+    version: 8
+
+test:
+  override:
+    - npm run ci
+
+notify:
+  webhooks:
+    - url: https://us-central1-hx-data-production.cloudfunctions.net/deploymentNotifier
+
+deployment:
+  production:
+    branch: master
+    commands:
+      - npm run release
