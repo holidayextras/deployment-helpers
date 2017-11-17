@@ -2,21 +2,16 @@
 
 const async = require('async')
 const fs = require('fs')
+const path = require('path')
+const utils = require('../src/utils')
 const exec = require('child_process').exec
 const git = require('simple-git')()
-const releaseBranches = process.env.releaseBranches || ['staging', 'master']
-
-let originalFile = process.env.npm_package_name + '.staging.min.js'
-let versionedFile = `dist/${process.env.npm_package_name}.staging.min.${process.env.npm_package_version}.js`
-if (process.env.NODE_ENV === 'production') {
-  originalFile = originalFile.replace('.staging', '')
-  versionedFile = versionedFile.replace('.staging', '')
-}
+const releaseBranch = process.env.releaseBranch || 'staging'
+const name = process.env.npm_package_name
+const version = process.env.npm_package_version
 
 const checkPrerequisites = callback => {
   if (!process.env.npm_package_name) return callback('ERROR: run this as an npm script (npm run release)')
-  // if (!process.env.GITHUB_USER || !process.env.GITHUB_API_TOKEN) return callback('ERROR: GitHub credentials not set')
-  // if (process.env.CIRCLECI && !process.env.GITHUB_EMAIL) return callback('ERROR: GitHub Email required for CircleCI')
   callback()
 }
 
@@ -41,15 +36,16 @@ const setUser = (name, callback) => {
 const checkBranch = callback => {
   git.revparse(['--abbrev-ref', 'HEAD'], (err, branch) => {
     if (err) return callback(err)
-    const currentBranch = process.env.TRAVIS_BRANCH || ('' + branch).replace(/\n/, '')
-    if (!releaseBranches.includes(currentBranch)) return callback(`Only releasing on ${releaseBranches}`)
+    const currentBranch = process.env.TRAVIS_BRANCH || process.env.CIRCLE_BRANCH || ('' + branch).replace(/\n/, '')
+    if (releaseBranch !== currentBranch) return callback(`Only releasing on ${releaseBranch}`)
     callback()
   })
 }
 
 const checkAlreadyReleased = callback => {
-  if (fs.exists(versionedFile)) {
-    return callback('Already exported this ' + versionedFile)
+  const fullPath = path.resolve(__dirname, `../dist/${name}.min.${version}.js`)
+  if (fs.existsSync(fullPath)) {
+    return callback(`Already exported ${name}.min.${version}.js`)
   }
   callback()
 }
@@ -62,12 +58,17 @@ const build = callback => {
 }
 
 const getSignature = (file, callback) => {
-  const versionedFile = file.replace('.js', `.${process.env.npm_package_version}.js`)
-  const cmd = `cp dist/${file} dist/${versionedFile} && cat dist/${versionedFile} | openssl dgst -sha256 -binary | openssl enc -base64 -A`
-  exec(cmd, (err, signature) => {
-    callback(err, versionedFile, signature)
+  utils.createVersionedDistFile(file, (err, versionedFile) => {
+    if (err) return callback(err)
+    utils.getIntegrity(versionedFile, (err, signature) => {
+      if (err) return callback(err)
+      callback(err, versionedFile, signature)
+    })
   })
 }
+
+const getSignedStagingFile = getSignature.bind(null, `${name}.staging.min.js`)
+const getSignedProductionFile = getSignature.bind(null, `${name}.min.js`)
 
 const updateChangelog = (versionedFile, signature, callback) => {
   fs.readFile('CHANGELOG.md', 'utf-8', (readErr, contents) => {
@@ -90,8 +91,8 @@ const addFile = (file, callback) => {
   })
 }
 
-const makeSignedFile = getSignature.bind(null, originalFile)
-const addVersionedFile = addFile.bind(null, versionedFile)
+const addStagingFile = addFile.bind(null, `dist/${name}.staging.min.${version}.js`)
+const addProductionFile = addFile.bind(null, `dist/${name}.min.${version}.js`)
 const addChangelog = addFile.bind(null, 'CHANGELOG.md')
 
 const commit = callback => {
@@ -123,10 +124,13 @@ async.waterfall([
   checkBranch,
   checkAlreadyReleased,
   build,
-  makeSignedFile,
+  getSignedStagingFile,
+  updateChangelog,
+  getSignedProductionFile,
   updateChangelog,
   addChangelog,
-  addVersionedFile,
+  addStagingFile,
+  addProductionFile,
   commit,
   push
 ], (err, result) => {

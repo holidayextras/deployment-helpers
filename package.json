@@ -2,16 +2,56 @@
   "name": "deployment-helpers",
   "version": "1.5.2",
   "description": "A collection of scripts that can be used as part of a deployment process.",
-  "main": "",
+  "main": "src/utils",
+  "bin": {
+    "create-private-release": "./nodeApps/createPrivateRelease.sh",
+    "generate-signed-file": "./nodeApps/generateSignedFile.js"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "coverage": "nyc mocha && nyc check-coverage",
+    "test": "npm run coverage",
+    "release": "scripts/generateSignedFile.js",
+    "lint": "standard",
+    "ci": "npm run lint && MOCHA_FILE=$CIRCLE_TEST_REPORTS/junit/test-results.xml nyc mocha --reporter mocha-junit-reporter && nyc check-coverage"
+  },
+  "standard": {
+    "globals": [
+      "after",
+      "afterEach",
+      "before",
+      "beforeEach",
+      "context",
+      "describe",
+      "expect",
+      "it",
+      "sandbox"
+    ],
+    "ignore": [
+      "/dist"
+    ]
+  },
+  "owner": "payment-platform",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "async": "^2.3.0",
+    "chai": "^3.5.0",
+    "dirty-chai": "^1.2.2",
+    "mocha": "^3.2.0",
+    "mocha-junit-reporter": "^1.13.0",
+    "nyc": "^10.1.2",
+    "simple-git": "^1.70.0",
+    "sinon": "^1.17.6",
+    "sinon-chai": "^2.8.0",
+    "standard": "^9.0.1"
+  },
+  "directories": {
+    "test": "test"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/holidayextras/deployment-helpers.git"
   },
   "author": "",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/holidayextras/deployment-helpers/issues"
   },
