@@ -10,7 +10,7 @@
   "scripts": {
     "coverage": "nyc mocha && nyc check-coverage",
     "test": "npm run coverage",
-    "release": "scripts/generateSignedFile.js",
+    "release": "nodeApps/createPrivateRelease.sh",
     "lint": "standard",
     "ci": "npm run lint && MOCHA_FILE=$CIRCLE_TEST_REPORTS/junit/test-results.xml nyc mocha --reporter mocha-junit-reporter && nyc check-coverage"
   },
