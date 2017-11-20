@@ -1,5 +1,4 @@
 const utils = require('../../src/utils')
-const path = require('path')
 const childProcess = require('child_process')
 
 describe('utils', function () {
@@ -16,7 +15,6 @@ describe('utils', function () {
     beforeEach(function () {
       callback = sandbox.stub()
       sandbox.stub(childProcess, 'exec')
-      sandbox.stub(path, 'resolve').returns('PATH')
     })
 
     describe('when we have version', function () {
@@ -28,7 +26,7 @@ describe('utils', function () {
 
       it('copies the file', function () {
         expect(childProcess.exec).to.have.been.calledOnce()
-          .and.calledWith('cp PATH/foo.js PATH/foo.VERSION.js')
+          .and.calledWith('cp foo.js foo.VERSION.js')
       })
 
       it('yields versioned file name', function () {
@@ -93,7 +91,6 @@ describe('utils', function () {
 
     beforeEach(function () {
       callback = sandbox.stub()
-      sandbox.stub(path, 'resolve')
       sandbox.stub(childProcess, 'exec').yields(null, 'SIGNATURE')
     })
 
