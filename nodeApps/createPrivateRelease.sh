@@ -34,7 +34,7 @@ if [ "${CURRENT_BRANCH}" != "${RELEASE_BRANCH}" ]; then
 fi
 
 # Check if we have not release this version already
-git pull
+git pull origin ${RELEASE_BRANCH}
 LAST_TAG=`git tag --list | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sort | tail -n 1`
 echo "Last tag: ${LAST_TAG}"
 THIS_VERSION=`cat package.json | grep version | head -n 1 | cut -d '"' -f 4`
