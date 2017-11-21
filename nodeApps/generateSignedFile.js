@@ -9,7 +9,8 @@ const git = require('simple-git')()
 const releaseBranch = process.env.releaseBranch || 'staging'
 const name = process.env.npm_package_name
 const version = process.env.npm_package_version
-const distPath = path.resolve(process.cwd(), '/dist')
+console.log('process.cwd() is', process.cwd())
+const distPath = process.cwd()
 
 const checkPrerequisites = callback => {
   if (!process.env.npm_package_name) return callback('ERROR: run this as an npm script (npm run release)')
@@ -46,22 +47,26 @@ const checkBranch = callback => {
 const checkAlreadyReleased = callback => {
   const fullPath = path.resolve(`${distPath}/${name}.min.${version}.js`)
   if (fs.existsSync(fullPath)) {
-    return callback(`Already exported ${name}.min.${version}.js`)
+    return callback(`Already exported ${distPath}${name}.min.${version}.js`)
   }
   callback()
 }
 
 const build = callback => {
   if (!process.env.npm_package_scripts_build) return callback()
+  console.log('building...')
   exec('npm run build', (err, result) => {
+    console.log('build got', err, result)
     callback(err)
   })
 }
 
 const getSignature = (file, callback) => {
   utils.createVersionedDistFile(file, (err, versionedFile) => {
+    console.log('createVersionedDistFile got', err, versionedFile)
     if (err) return callback(err)
     utils.getIntegrity(versionedFile, (err, signature) => {
+      console.log('getIntegrity got', err, signature)
       if (err) return callback(err)
       callback(err, versionedFile, signature)
     })
@@ -92,8 +97,8 @@ const addFile = (file, callback) => {
   })
 }
 
-const addStagingFile = addFile.bind(null, `dist/${name}.staging.min.${version}.js`)
-const addProductionFile = addFile.bind(null, `dist/${name}.min.${version}.js`)
+const addStagingFile = addFile.bind(null, `${distPath}/${name}.staging.min.${version}.js`)
+const addProductionFile = addFile.bind(null, `${distPath}/${name}.min.${version}.js`)
 const addChangelog = addFile.bind(null, 'CHANGELOG.md')
 
 const commit = callback => {
