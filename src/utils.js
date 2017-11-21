@@ -15,7 +15,6 @@ devUtils.createVersionedDistFile = (file, callback) => {
   if (!process.env.npm_package_version) return callback('Version missing - must run this as an npm script')
   const versionedFile = file.replace('.js', `.${process.env.npm_package_version}.js`)
   const cmd = `cp ${file} ${versionedFile}`
-  console.log(cmd)
   childProcess.exec(cmd, err => {
     callback(err, versionedFile)
   })
@@ -23,6 +22,5 @@ devUtils.createVersionedDistFile = (file, callback) => {
 
 devUtils.getSignature = (file, callback) => {
   const cmd = `cat ${file} | openssl dgst -sha256 -binary | openssl enc -base64 -A`
-  console.log(cmd)
   childProcess.exec(cmd, callback)
 }

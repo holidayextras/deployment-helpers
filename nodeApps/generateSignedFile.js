@@ -9,8 +9,7 @@ const git = require('simple-git')()
 const releaseBranch = process.env.releaseBranch || 'staging'
 const name = process.env.npm_package_name
 const version = process.env.npm_package_version
-console.log('process.cwd() is', process.cwd())
-const distPath = process.cwd()
+const distPath = path.join(process.cwd(), '/dist')
 
 const checkPrerequisites = callback => {
   if (!process.env.npm_package_name) return callback('ERROR: run this as an npm script (npm run release)')
@@ -54,19 +53,15 @@ const checkAlreadyReleased = callback => {
 
 const build = callback => {
   if (!process.env.npm_package_scripts_build) return callback()
-  console.log('building...')
   exec('npm run build', (err, result) => {
-    console.log('build got', err, result)
     callback(err)
   })
 }
 
 const getSignature = (file, callback) => {
   utils.createVersionedDistFile(file, (err, versionedFile) => {
-    console.log('createVersionedDistFile got', err, versionedFile)
     if (err) return callback(err)
     utils.getIntegrity(versionedFile, (err, signature) => {
-      console.log('getIntegrity got', err, signature)
       if (err) return callback(err)
       callback(err, versionedFile, signature)
     })
@@ -79,11 +74,12 @@ const getSignedProductionFile = getSignature.bind(null, `${distPath}/${name}.min
 const updateChangelog = (versionedFile, signature, callback) => {
   fs.readFile('CHANGELOG.md', 'utf-8', (readErr, contents) => {
     if (readErr) return callback(readErr)
-    const existingLines = new RegExp(`.*${versionedFile}.*`, 'g')
+    const file = ('' + versionedFile).replace(distPath, '')
+    const existingLines = new RegExp(`.*${file}.*`, 'g')
     const newContents = contents
       .replace(existingLines, '')
       .replace(/\n\s*\n/g, '\n')
-      .replace('# Changelog', `# Changelog \n\n- ${versionedFile} - signature: ${signature}`)
+      .replace('# Changelog', `# Changelog \n\n- ${file} - signature: ${signature}`)
     fs.writeFile('CHANGELOG.md', newContents, function (writeErr) {
       if (writeErr) return callback(writeErr)
       callback()
