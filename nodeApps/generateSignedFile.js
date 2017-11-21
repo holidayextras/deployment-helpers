@@ -9,7 +9,7 @@ const git = require('simple-git')()
 const releaseBranch = process.env.releaseBranch || 'staging'
 const name = process.env.npm_package_name
 const version = process.env.npm_package_version
-const distPath = path.resolve(process.cwd(), '/dist')
+const distPath = path.join(process.cwd(), '/dist')
 
 const checkPrerequisites = callback => {
   if (!process.env.npm_package_name) return callback('ERROR: run this as an npm script (npm run release)')
@@ -46,7 +46,7 @@ const checkBranch = callback => {
 const checkAlreadyReleased = callback => {
   const fullPath = path.resolve(`${distPath}/${name}.min.${version}.js`)
   if (fs.existsSync(fullPath)) {
-    return callback(`Already exported ${name}.min.${version}.js`)
+    return callback(`Already exported ${distPath}${name}.min.${version}.js`)
   }
   callback()
 }
@@ -74,11 +74,12 @@ const getSignedProductionFile = getSignature.bind(null, `${distPath}/${name}.min
 const updateChangelog = (versionedFile, signature, callback) => {
   fs.readFile('CHANGELOG.md', 'utf-8', (readErr, contents) => {
     if (readErr) return callback(readErr)
-    const existingLines = new RegExp(`.*${versionedFile}.*`, 'g')
+    const file = ('' + versionedFile).replace(distPath, '')
+    const existingLines = new RegExp(`.*${file}.*`, 'g')
     const newContents = contents
       .replace(existingLines, '')
       .replace(/\n\s*\n/g, '\n')
-      .replace('# Changelog', `# Changelog \n\n- ${versionedFile} - signature: ${signature}`)
+      .replace('# Changelog', `# Changelog \n\n- ${file} - signature: ${signature}`)
     fs.writeFile('CHANGELOG.md', newContents, function (writeErr) {
       if (writeErr) return callback(writeErr)
       callback()
@@ -92,8 +93,8 @@ const addFile = (file, callback) => {
   })
 }
 
-const addStagingFile = addFile.bind(null, `dist/${name}.staging.min.${version}.js`)
-const addProductionFile = addFile.bind(null, `dist/${name}.min.${version}.js`)
+const addStagingFile = addFile.bind(null, `${distPath}/${name}.staging.min.${version}.js`)
+const addProductionFile = addFile.bind(null, `${distPath}/${name}.min.${version}.js`)
 const addChangelog = addFile.bind(null, 'CHANGELOG.md')
 
 const commit = callback => {
