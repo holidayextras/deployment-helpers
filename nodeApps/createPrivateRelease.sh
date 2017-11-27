@@ -47,7 +47,7 @@ fi
 git checkout ${RELEASE_BRANCH}
 git branch
 if [ -d dist ]; then
-  git rm dist -r
+  git rm dist -fr
 fi
 
 if [ ! -z `npm run | grep '^  build$'` ]; then
