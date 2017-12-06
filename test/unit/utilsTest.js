@@ -1,31 +1,50 @@
 const utils = require('../../src/utils')
+const async = require('async')
 const childProcess = require('child_process')
+// const git = require('simple-git')()
 
 describe('utils', function () {
+  let callback = null
+
   beforeEach(function () {
+    callback = sandbox.stub()
   })
 
   afterEach(function () {
     sandbox.restore()
   })
 
-  describe('createVersionedFile', function () {
-    let callback = null
-
+  describe('exec', function () {
     beforeEach(function () {
-      callback = sandbox.stub()
-      sandbox.stub(childProcess, 'exec')
+      sandbox.stub(childProcess, 'exec').yields(null, 'foo', 'bar')
+      utils.exec('CMD', callback)
+    })
+
+    it('proxies childProcess.exec', function () {
+      expect(childProcess.exec).to.have.been.calledOnce()
+        .and.calledWith('CMD')
+    })
+
+    it('yields, throwing away stderr', function () {
+      expect(callback).to.have.been.calledOnce()
+        .and.calledWith(null, 'foo')
+    })
+  })
+
+  describe('createVersionedFile', function () {
+    beforeEach(function () {
+      sandbox.stub(utils, 'exec').yields()
     })
 
     describe('when we have version', function () {
       beforeEach(function () {
-        childProcess.exec.yields(null)
-        process.env.npm_package_version = 'VERSION'
+        utils.exec.yields(null)
+        utils.version = 'VERSION'
         utils.createVersionedDistFile('foo.js', callback)
       })
 
       it('copies the file', function () {
-        expect(childProcess.exec).to.have.been.calledOnce()
+        expect(utils.exec).to.have.been.calledOnce()
           .and.calledWith('cp foo.js foo.VERSION.js')
       })
 
@@ -37,13 +56,42 @@ describe('utils', function () {
 
     describe('when we do not have version', function () {
       beforeEach(function () {
-        childProcess.exec.yields(null)
-        delete process.env.npm_package_version
+        utils.version = null
         utils.createVersionedDistFile('foo.js', callback)
       })
 
       it('does not copy the file', function () {
-        expect(childProcess.exec).not.to.have.been.called()
+        expect(utils.exec).not.to.have.been.called()
+      })
+
+      it('yields an error', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly(sandbox.match.string)
+      })
+    })
+  })
+
+  describe('checkPrerequisites', function () {
+    beforeEach(function () {
+      sandbox.stub(async, 'waterfall').yields()
+    })
+
+    describe('when we have a name', function () {
+      beforeEach(function () {
+        utils.name = 'foo'
+        utils.checkPrerequisites(callback)
+      })
+
+      it('yields', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly()
+      })
+    })
+
+    describe('when we do not have a name', function () {
+      beforeEach(function () {
+        utils.name = null
+        utils.checkPrerequisites(callback)
       })
 
       it('yields an error', function () {
@@ -54,10 +102,8 @@ describe('utils', function () {
   })
 
   describe('getIntegrity', function () {
-    let callback = null
-
     beforeEach(function () {
-      callback = sandbox.stub()
+      sandbox.stub(utils, 'exec').yields()
       sandbox.stub(utils, 'getSignature')
     })
 
@@ -87,16 +133,13 @@ describe('utils', function () {
   })
 
   describe('getSignature', function () {
-    let callback = null
-
     beforeEach(function () {
-      callback = sandbox.stub()
-      sandbox.stub(childProcess, 'exec').yields(null, 'SIGNATURE')
+      sandbox.stub(utils, 'exec').yields()
     })
 
     describe('when signature is ok', function () {
       beforeEach(function () {
-        childProcess.exec.yields(null, 'SIGNATURE')
+        utils.exec.yields(null, 'SIGNATURE')
         utils.getSignature('foo', callback)
       })
 
@@ -108,13 +151,33 @@ describe('utils', function () {
 
     describe('when signature errors', function () {
       beforeEach(function () {
-        childProcess.exec.yields('OOPS')
+        utils.exec.yields('OOPS')
         utils.getSignature('foo', callback)
       })
 
       it('yields error only', function () {
         expect(callback).to.have.been.calledOnce()
           .and.calledWithExactly('OOPS')
+      })
+    })
+  })
+
+  describe('getCommitMessagesSinceLastRelease', function () {
+    beforeEach(function () {
+      sandbox.stub(utils, 'exec').yields()
+    })
+
+    describe('something', function () {
+      beforeEach(function () {
+        utils.getCommitMessagesSinceLastRelease(callback)
+      })
+
+      it('calls exec', function () {
+        expect(utils.exec).to.have.been.calledOnce()
+      })
+
+      it('yields', function () {
+        expect(callback).to.have.been.calledOnce()
       })
     })
   })

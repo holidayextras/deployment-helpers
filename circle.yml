@@ -11,6 +11,10 @@ notify:
     - url: https://us-central1-hx-data-production.cloudfunctions.net/deploymentNotifier
 
 deployment:
+  testing:
+    branch: PAY-868
+    commands:
+      - RELEASE_BRANCH=PAY-868 npm run prereleasejs
   production:
     branch: master
     commands:
