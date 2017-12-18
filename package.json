@@ -1,18 +1,38 @@
 {
   "name": "deployment-helpers",
-  "version": "1.7.4",
+  "version": "1.8.0",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "main": "src/utils",
   "bin": {
+    "check-built-asset-size": "./nodeApps/checkBuiltAssetSize.js",
     "create-private-release": "./nodeApps/createPrivateRelease.sh",
+    "release": "./nodeApps/release.js",
+    "prerelease": "./nodeApps/preRelease.js",
     "generate-signed-file": "./nodeApps/generateSignedFile.js"
   },
   "scripts": {
     "coverage": "nyc mocha && nyc check-coverage",
     "test": "npm run coverage",
+    "prereleasejs": "nodeApps/preRelease.js",
+    "releasejs": "nodeApps/release.js",
     "release": "nodeApps/createPrivateRelease.sh",
     "lint": "standard",
     "ci": "npm run lint && MOCHA_FILE=$CIRCLE_TEST_REPORTS/junit/test-results.xml nyc mocha --reporter mocha-junit-reporter && nyc check-coverage"
+  },
+  "nyc": {
+    "all": true,
+    "reporter": [
+      "html",
+      "text"
+    ],
+    "statements": 10,
+    "lines": 10,
+    "branches": 10,
+    "functions": 10,
+    "exclude": [
+      "coverage",
+      "nodeApps"
+    ]
   },
   "standard": {
     "globals": [
@@ -32,8 +52,11 @@
   },
   "owner": "payment-platform",
   "license": "UNLICENSED",
-  "devDependencies": {
+  "dependencies": {
     "async": "^2.3.0",
+    "simple-git": "^1.70.0"
+  },
+  "devDependencies": {
     "chai": "^3.5.0",
     "dirty-chai": "^1.2.2",
     "mocha": "^3.2.0",

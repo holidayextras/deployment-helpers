@@ -6,47 +6,16 @@ const path = require('path')
 const utils = require('../src/utils')
 const exec = require('child_process').exec
 const git = require('simple-git')()
-const releaseBranch = process.env.releaseBranch || 'staging'
+const releaseBranch = process.env.RELEASE_BRANCH || 'staging'
 const name = process.env.npm_package_name
 const version = process.env.npm_package_version
-const distPath = path.join(process.cwd(), '/dist')
+const distPath = path.join(process.cwd(), '/dist/')
 
-const checkPrerequisites = callback => {
-  if (!process.env.npm_package_name) return callback('ERROR: run this as an npm script (npm run release)')
-  callback()
-}
-
-const getEmail = callback => {
-  git.raw(['config', '--get', 'user.email'], callback)
-}
-
-const setEmail = (email, callback) => {
-  if (!email) git.addConfig('user.email', process.env.GITHUB_EMAIL)
-  callback()
-}
-
-const getUser = callback => {
-  git.raw(['config', '--get', 'user.name'], callback)
-}
-
-const setUser = (name, callback) => {
-  if (!name) git.addConfig('user.name', process.env.GITHUB_EMAIL)
-  callback()
-}
-
-const checkBranch = callback => {
-  git.revparse(['--abbrev-ref', 'HEAD'], (err, branch) => {
-    if (err) return callback(err)
-    const currentBranch = process.env.TRAVIS_BRANCH || process.env.CIRCLE_BRANCH || ('' + branch).replace(/\n/, '')
-    if (releaseBranch !== currentBranch) return callback(`Only releasing on ${releaseBranch}`)
-    callback()
-  })
-}
-
-const checkAlreadyReleased = callback => {
-  const fullPath = path.resolve(`${distPath}/${name}.min.${version}.js`)
+const checkAlreadyVersioned = callback => {
+  const file = `${distPath}/${name}.min.${version}.js`
+  const fullPath = path.resolve(file)
   if (fs.existsSync(fullPath)) {
-    return callback(`Already exported ${distPath}${name}.min.${version}.js`)
+    return callback(`Already exported ${file}`)
   }
   callback()
 }
@@ -68,10 +37,16 @@ const getSignature = (file, callback) => {
   })
 }
 
+const getCommitMessagesSinceLastRelease = (versionedFile, signature, callback) => {
+  utils.getCommitMessagesSinceLastRelease((err, notes) => {
+    callback(err, notes, versionedFile, signature)
+  })
+}
+
 const getSignedStagingFile = getSignature.bind(null, `${distPath}/${name}.staging.min.js`)
 const getSignedProductionFile = getSignature.bind(null, `${distPath}/${name}.min.js`)
 
-const updateChangelog = (versionedFile, signature, callback) => {
+const updateChangelog = (notes, versionedFile, signature, callback) => {
   fs.readFile('CHANGELOG.md', 'utf-8', (readErr, contents) => {
     if (readErr) return callback(readErr)
     const file = ('' + versionedFile).replace(distPath, '')
@@ -79,7 +54,7 @@ const updateChangelog = (versionedFile, signature, callback) => {
     const newContents = contents
       .replace(existingLines, '')
       .replace(/\n\s*\n/g, '\n')
-      .replace('# Changelog', `# Changelog \n\n- ${file} - signature: ${signature}`)
+      .replace('# Changelog', `# Changelog \n\n- ${file} - signature: ${signature}${notes}`)
     fs.writeFile('CHANGELOG.md', newContents, function (writeErr) {
       if (writeErr) return callback(writeErr)
       callback()
@@ -118,18 +93,15 @@ const push = callback => {
 }
 
 async.waterfall([
-  checkPrerequisites,
-  getEmail,
-  setEmail,
-  getUser,
-  setUser,
-  checkBranch,
-  checkAlreadyReleased,
+  utils.checkPrerequisites,
+  utils.checkBranch.bind(utils, releaseBranch),
+  checkAlreadyVersioned,
   build,
   getSignedStagingFile,
+  getCommitMessagesSinceLastRelease,
   updateChangelog,
   getSignedProductionFile,
-  updateChangelog,
+  updateChangelog.bind(null, ''),
   addChangelog,
   addStagingFile,
   addProductionFile,
