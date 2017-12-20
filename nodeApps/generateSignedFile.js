@@ -73,12 +73,13 @@ const addProductionFile = addFile.bind(null, `${distPath}/${name}.min.${version}
 const addChangelog = addFile.bind(null, 'CHANGELOG.md')
 
 const commit = callback => {
-  let message = ':airplane: Release via CI build -ci'
+  let message = ':airplane: Release via CI build '
   if (process.env.CIRCLE_BUILD_NUM) {
-    message = message + ` [${process.env.CIRCLE_BUILD_NUM}](https://circleci.com/gh/${process.env.npm_package_name}/${process.env.CIRCLE_BUILD_NUM})`
+    message = message + `[${process.env.CIRCLE_BUILD_NUM}](https://circleci.com/gh/${process.env.npm_package_name}/${process.env.CIRCLE_BUILD_NUM})`
   } else if (process.env.TRAVIS_JOB_NUMBER) {
-    message = message + ` [${process.env.TRAVIS_JOB_ID}](https://travis-ci.com/${process.env.npm_package_name}/jobs/${process.env.TRAVIS_JOB_ID})`
+    message = message + `[${process.env.TRAVIS_JOB_ID}](https://travis-ci.com/${process.env.npm_package_name}/jobs/${process.env.TRAVIS_JOB_ID})`
   }
+  message = message + '\n\n[skip ci]'
   git.commit(message, (err, result) => {
     callback(err)
   })
