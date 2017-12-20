@@ -108,7 +108,7 @@ utils.getCommitMessagesSinceLastRelease = callback => {
 }
 
 utils.tagVersion = (tag, notes, callback) => {
-  let message = ':airplane: Release via CI build '
+  let message = ':airplane: Release via CI build (skip ci)'
   if (process.env.CIRCLE_BUILD_NUM) {
     message = message + `[${process.env.CIRCLE_BUILD_NUM}](https://circleci.com/gh/${utils.ownerAndName}/${process.env.CIRCLE_BUILD_NUM})`
   } else if (process.env.TRAVIS_JOB_NUMBER) {
