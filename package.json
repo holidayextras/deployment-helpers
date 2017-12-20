@@ -1,6 +1,6 @@
 {
   "name": "deployment-helpers",
-  "version": "1.8.1",
+  "version": "1.8.2",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "main": "src/utils",
   "bin": {
@@ -24,10 +24,10 @@
       "html",
       "text"
     ],
-    "statements": 10,
-    "lines": 10,
-    "branches": 10,
-    "functions": 10,
+    "statements": 90,
+    "lines": 90,
+    "branches": 60,
+    "functions": 90,
     "exclude": [
       "coverage",
       "nodeApps"

@@ -15,6 +15,7 @@ utils.name = process.env.npm_package_name
 utils.ownerAndName = `holidayextras/${utils.name}`
 utils.distFolder = process.env.DIST_FOLDER || 'dist'
 const repo = ('' + process.env.npm_package_repository_url).split('/')
+/* istanbul ignore else */
 if (repo.pop() === `${utils.name}.git`) {
   utils.ownerAndName = `${repo.pop()}/${utils.name}`
 }
@@ -108,7 +109,7 @@ utils.getCommitMessagesSinceLastRelease = callback => {
 }
 
 utils.tagVersion = (tag, notes, callback) => {
-  let message = ':airplane: Release via CI build (skip ci)'
+  let message = ':airplane: Release via CI build '
   if (process.env.CIRCLE_BUILD_NUM) {
     message = message + `[${process.env.CIRCLE_BUILD_NUM}](https://circleci.com/gh/${utils.ownerAndName}/${process.env.CIRCLE_BUILD_NUM})`
   } else if (process.env.TRAVIS_JOB_NUMBER) {
@@ -127,7 +128,6 @@ utils.tagVersion = (tag, notes, callback) => {
     }
     const releaseJSON = JSON.stringify(release).replace(/'/g, '')
     const cmd = `curl ${credentials} --data '${releaseJSON}' https://api.github.com/repos/${utils.ownerAndName}/releases`
-    console.log('cmd is', cmd)
     utils.exec(cmd, err => {
       if (err) console.warn(err)
       callback()
@@ -178,7 +178,7 @@ utils.reportSize = (size, previousSize, callback) => {
     console.warn(`⚠️  file size has gone up from ${previousSize} to ${size} bytes`)
     if (delta > 1) console.warn('🙀  this is more than 1% increase!')
   } else if (delta < -1) {
-    console.log('🐭  good file size reducing!')
+    console.info('🐭  good file size reducing!')
   }
   callback()
 }
