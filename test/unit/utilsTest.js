@@ -1,5 +1,6 @@
 const utils = require('../../src/utils')
 const async = require('async')
+const fs = require('fs')
 const childProcess = require('child_process')
 
 describe('utils', function () {
@@ -295,6 +296,363 @@ describe('utils', function () {
       it('yields', function () {
         expect(callback).to.have.been.calledOnce()
           .and.calledWithExactly()
+      })
+    })
+  })
+
+  describe('getCommitMessagesSinceLastRelease', function () {
+    let version = null
+
+    beforeEach(function () {
+      version = utils.versionTag
+      utils.versionTag = 'VERSION'
+      sandbox.stub(utils, 'exec').yields()
+      utils.getCommitMessagesSinceLastRelease(callback)
+    })
+
+    afterEach(function () {
+      utils.versionTag = version
+    })
+
+    it('calls exec', function () {
+      expect(utils.exec).to.have.been.calledOnce()
+    })
+
+    it('yields', function () {
+      expect(callback).to.have.been.calledOnce()
+    })
+  })
+
+  describe('tagVersion', function () {
+    beforeEach(function () {
+      sandbox.stub(utils, 'exec').yields()
+      sandbox.stub(console, 'warn')
+    })
+
+    describe('when first call errors', function () {
+      beforeEach(function () {
+        utils.exec.onFirstCall().yields('oops')
+        utils.tagVersion('TAG', 'NOTES', callback)
+      })
+
+      it('yields the error', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly('oops')
+      })
+    })
+
+    describe('when second call errors', function () {
+      beforeEach(function () {
+        utils.exec.onSecondCall().yields('oops')
+        utils.tagVersion('TAG', 'NOTES', callback)
+      })
+
+      it('warns us', function () {
+        expect(console.warn).to.have.been.calledOnce()
+          .and.calledWithExactly('oops')
+      })
+
+      it('just yields', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly()
+      })
+    })
+  })
+
+  describe('deleteTag', function () {
+    beforeEach(function () {
+      sandbox.stub(utils, 'exec').yields()
+      sandbox.stub(console, 'warn')
+    })
+
+    describe('when it errors', function () {
+      beforeEach(function () {
+        utils.exec.yields('oops')
+        utils.deleteTag('foo', callback)
+      })
+
+      it('warns us', function () {
+        expect(console.warn).to.have.been.calledOnce()
+          .and.calledWithExactly(sandbox.match.string, 'oops')
+      })
+
+      it('yields', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly()
+      })
+    })
+
+    describe('when all is ok', function () {
+      beforeEach(function () {
+        utils.deleteTag('foo', callback)
+      })
+
+      it('does not warn us', function () {
+        expect(console.warn).not.to.have.been.called()
+      })
+
+      it('yields', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly()
+      })
+    })
+  })
+
+  describe('confirmOnFeatureBranch', function () {
+    beforeEach(function () {
+      sandbox.stub(utils, 'checkBranch').yields('oops')
+    })
+
+    describe('when we are on master branch', function () {
+      beforeEach(function () {
+        utils.checkBranch.withArgs('master').yields()
+        utils.confirmOnFeatureBranch(callback)
+      })
+
+      it('yields an error', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly(sandbox.match.string)
+      })
+    })
+
+    describe('when we are on staging branch', function () {
+      beforeEach(function () {
+        utils.checkBranch.withArgs('staging').yields()
+        utils.confirmOnFeatureBranch(callback)
+      })
+
+      it('yields an error', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly(sandbox.match.string)
+      })
+    })
+
+    describe('when we are on neither', function () {
+      beforeEach(function () {
+        utils.confirmOnFeatureBranch(callback)
+      })
+
+      it('yields', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly()
+      })
+    })
+  })
+
+  describe('getSize', function () {
+    beforeEach(function () {
+      sandbox.stub(fs, 'stat').yields()
+      sandbox.stub(console, 'warn')
+    })
+
+    describe('when it errors', function () {
+      beforeEach(function () {
+        fs.stat.yields('oops')
+        utils.getSize('FILE', callback)
+      })
+
+      it('warns us', function () {
+        expect(console.warn).to.have.been.calledOnce()
+      })
+
+      it('yields the error', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly('oops')
+      })
+    })
+
+    describe('when we have no file stats', function () {
+      beforeEach(function () {
+        fs.stat.yields(null)
+        utils.getSize('FILE', callback)
+      })
+
+      it('warns us', function () {
+        expect(console.warn).to.have.been.calledOnce()
+      })
+
+      it('yields', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly(null)
+      })
+    })
+
+    describe('when we have file stats', function () {
+      beforeEach(function () {
+        fs.stat.yields(null, { size: 666 })
+        utils.getSize('FILE', callback)
+      })
+
+      it('yields the file size', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly(null, 666)
+      })
+    })
+  })
+
+  describe('reportSize', function () {
+    beforeEach(function () {
+      sandbox.stub(console, 'info')
+      sandbox.stub(console, 'warn')
+    })
+
+    describe('when size is sligthly smaller', function () {
+      beforeEach(function () {
+        utils.reportSize(666, 667, callback)
+      })
+
+      it('does not log it', function () {
+        expect(console.info).not.to.have.been.called()
+      })
+
+      it('does not warn us', function () {
+        expect(console.warn).not.to.have.been.called()
+      })
+    })
+
+    describe('when size is significantly smaller', function () {
+      beforeEach(function () {
+        utils.reportSize(666, 777, callback)
+      })
+
+      it('logs it in a friendly way', function () {
+        expect(console.info).to.have.been.called()
+      })
+
+      it('does not warn us', function () {
+        expect(console.warn).not.to.have.been.called()
+      })
+    })
+
+    describe('when size is slightly bigger', function () {
+      beforeEach(function () {
+        utils.reportSize(667, 666, callback)
+      })
+
+      it('has no friendly message', function () {
+        expect(console.info).not.to.have.been.called()
+      })
+
+      it('warns us', function () {
+        expect(console.warn).to.have.been.calledOnce()
+      })
+    })
+
+    describe('when size is significantly bigger', function () {
+      beforeEach(function () {
+        utils.reportSize(777, 666, callback)
+      })
+
+      it('warns us twice', function () {
+        expect(console.warn).to.have.been.calledTwice()
+      })
+    })
+  })
+
+  describe('getBuiltSizeOfBranch', function () {
+    beforeEach(function () {
+      sandbox.stub(utils, 'exec').yields()
+      sandbox.stub(utils, 'getSize').yields()
+    })
+
+    describe('when build errors', function () {
+      beforeEach(function () {
+        utils.exec.yields('oops')
+        utils.getBuiltSizeOfBranch('BRANCH', callback)
+      })
+
+      it('yields the error', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly('oops')
+      })
+    })
+
+    describe('when it builds successfully', function () {
+      beforeEach(function () {
+        utils.exec.yields()
+        utils.getBuiltSizeOfBranch('BRANCH', callback)
+      })
+
+      it('gets the size', function () {
+        expect(utils.getSize).to.have.been.calledOnce()
+          .and.calledWithExactly(sandbox.match.string, callback)
+      })
+    })
+  })
+
+  describe('getBuiltAssetStats', function () {
+    beforeEach(function () {
+      sandbox.stub(utils, 'getBranch').yields(null, 'foo')
+      sandbox.stub(utils, 'getBuiltSizeOfBranch').yields()
+      sandbox.stub(utils, 'reportSize').yields()
+    })
+
+    describe('when on the wrong branch', function () {
+      beforeEach(function () {
+        utils.getBranch.yields('oops')
+        utils.getBuiltAssetStats(callback)
+      })
+
+      it('does not get sizes', function () {
+        expect(utils.getBuiltSizeOfBranch).not.to.have.been.called()
+      })
+
+      it('does not report size', function () {
+        expect(utils.reportSize).not.to.have.been.called()
+      })
+
+      it('yields an error', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly('oops')
+      })
+    })
+
+    describe('when getting size of master branch errors', function () {
+      beforeEach(function () {
+        utils.getBuiltSizeOfBranch.withArgs('master').yields('oops')
+        utils.getBuiltAssetStats(callback)
+      })
+
+      it('does not get size of other branch', function () {
+        expect(utils.getBuiltSizeOfBranch).to.have.been.calledOnce()
+      })
+
+      it('does not report size', function () {
+        expect(utils.reportSize).not.to.have.been.called()
+      })
+
+      it('yields an error', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly('oops')
+      })
+    })
+
+    describe('when getting size of this branch errors', function () {
+      beforeEach(function () {
+        utils.getBuiltSizeOfBranch.withArgs('foo').yields('oops')
+        utils.getBuiltAssetStats(callback)
+      })
+
+      it('does not report size', function () {
+        expect(utils.reportSize).not.to.have.been.called()
+      })
+
+      it('yields an error', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly('oops')
+      })
+    })
+
+    describe('when all is ok', function () {
+      beforeEach(function () {
+        utils.getBuiltSizeOfBranch.withArgs('foo').yields(null, 666)
+        utils.getBuiltSizeOfBranch.withArgs('master').yields(null, 777)
+        utils.getBuiltAssetStats(callback)
+      })
+
+      it('reports size', function () {
+        expect(utils.reportSize).to.have.been.calledOnce()
+          .and.calledWithExactly(666, 777, callback)
       })
     })
   })

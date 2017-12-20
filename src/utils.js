@@ -29,7 +29,7 @@ utils.getIntegrity = (file, callback) => {
 
 utils.exec = (cmd, callback) => {
   childProcess.exec(cmd, (err, stdout, stderr) => {
-    // console.log(cmd, 'got', err, stdout, stderr)
+    // console.info(cmd, 'got', err, stdout, stderr)
     callback(err, stdout)
   })
 }
@@ -120,7 +120,7 @@ utils.tagVersion = (tag, notes, callback) => {
     const body = [message, notes].join('\n').replace(/"/g, '')
     const release = {
       tag_name: tag,
-      target_commitish: sha.trim(),
+      target_commitish: ('' + sha).trim(),
       name: tag,
       body,
       draft: false,
@@ -165,7 +165,7 @@ utils.confirmOnFeatureBranch = callback => {
 utils.getSize = (file, callback) => {
   fs.stat(file, (err, result) => {
     if (err || !result) {
-      console.log('could not stat', file, 'did you not `npm run build`?')
+      console.warn('could not stat', file, 'did you not `npm run build`?')
       return callback(err)
     }
     callback(null, result.size)
