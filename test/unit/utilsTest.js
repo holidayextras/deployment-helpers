@@ -221,6 +221,7 @@ describe('utils', function () {
   describe('getBranch', function () {
     describe('with travis', function () {
       beforeEach(function () {
+        delete process.env.CIRCLE_BRANCH
         process.env.TRAVIS_BRANCH = 'foo'
       })
 
@@ -233,6 +234,7 @@ describe('utils', function () {
 
     describe('with circle', function () {
       beforeEach(function () {
+        delete process.env.TRAVIS_BRANCH
         process.env.CIRCLE_BRANCH = 'foo'
       })
 
@@ -244,6 +246,11 @@ describe('utils', function () {
     })
 
     describe('with neither', function () {
+      beforeEach(function () {
+        delete process.env.CIRCLE_BRANCH
+        delete process.env.TRAVIS_BRANCH
+      })
+
       it('does not throw', function () {
         expect(function () {
           utils.getBranch(callback)
@@ -409,6 +416,19 @@ describe('utils', function () {
       })
 
       it('yields', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly()
+      })
+    })
+
+    describe('when we have neither ci env vars', function () {
+      beforeEach(function () {
+        delete process.env.CIRCLE_BUILD_NUM
+        delete process.env.TRAVIS_JOB_NUMBER
+        utils.tagVersion('TAG', 'NOTES', callback)
+      })
+
+      it('still yields', function () {
         expect(callback).to.have.been.calledOnce()
           .and.calledWithExactly()
       })
