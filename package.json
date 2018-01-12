@@ -1,6 +1,6 @@
 {
   "name": "deployment-helpers",
-  "version": "1.8.4",
+  "version": "1.8.5",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "main": "src/utils",
   "bin": {

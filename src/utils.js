@@ -59,7 +59,9 @@ utils.checkPrerequisites = callback => {
 
 utils.getEmail = callback => {
   const cmd = 'git config --get user.email'
-  utils.exec(cmd, callback)
+  utils.exec(cmd, () => {
+    callback()
+  })
 }
 
 utils.setEmail = (email, callback) => {
@@ -70,7 +72,9 @@ utils.setEmail = (email, callback) => {
 
 utils.getUser = callback => {
   const cmd = 'git config --get user.name'
-  utils.exec(cmd, callback)
+  utils.exec(cmd, () => {
+    callback()
+  })
 }
 
 utils.setUser = (name, callback) => {
