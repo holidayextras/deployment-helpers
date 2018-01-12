@@ -4,6 +4,8 @@ const fs = require('fs')
 
 const utils = module.exports = {}
 
+utils.labelPullRequestWithMetricMovement = require('./labelPullRequestWithMetricMovement')
+
 const credentials = `-u "${process.env.GITHUB_USER}:${process.env.GITHUB_API_TOKEN}"`
 
 utils.version = process.env.npm_package_version
@@ -184,21 +186,40 @@ utils.getSize = (file, callback) => {
   })
 }
 
-utils.reportSize = (size, previousSize, callback) => {
-  const delta = ((size - previousSize) / previousSize) * 100
+utils.reportSize = (current, previous, callback) => {
+  const delta = ((current - previous) / previous) * 100
   if (delta > 0) {
-    console.warn(`⚠️  file size has gone up from ${previousSize} to ${size} bytes`)
+    console.warn(`⚠️  file size has gone up from ${previous} to ${current} bytes`)
     if (delta > 1) console.warn(`🙀  this is more than ${parseInt(delta, 10)}% increase!`)
   } else if (delta < -1) {
     console.info('🐭  good file size reducing!')
   }
+  let prNumber = process.env.TRAVIS_PR_NUMBER
+  if (process.env.CI_PULL_REQUEST) {
+    prNumber = ('' + process.env.CI_PULL_REQUEST).split('/').pop()
+  }
+  /* istanbul ignore next */
+  utils.labelPullRequestWithMetricMovement({
+    githubToken: process.env.GITHUB_API_TOKEN,
+    ownerAndRepo: utils.ownerAndName,
+    prNumber,
+    metrics: { previous, current },
+    desirableTrajectory: 'DECREASE',
+    minorPercentageThreshold: 1,
+    minorValueThreshold: 300,
+    majorPercentageThreshold: 3,
+    majorValueThreshold: 2000,
+    labelModifier: 'page weight'
+  }).catch(err => {
+    console.error('Problem applying page weight label', err)
+  })
   callback()
 }
 
 // relies on the built asset being named for the repo
 utils.getBuiltSizeOfBranch = (branch, callback) => {
   const file = `${utils.distFolder}/${utils.name}.min.js`
-  utils.exec(`git checkout ${utils.distFolder}/; git checkout ${branch} && NODE_ENV=production npm run build > /dev/null`, err => {
+  utils.exec(`git checkout ${utils.distFolder} 2> /dev/null; git checkout ${branch} && NODE_ENV=production npm run build > /dev/null`, err => {
     if (err) return callback(err)
     utils.getSize(file, callback)
   })

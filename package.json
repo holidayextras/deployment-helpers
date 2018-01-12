@@ -1,8 +1,8 @@
 {
   "name": "deployment-helpers",
-  "version": "1.8.6",
+  "version": "1.8.7",
   "description": "A collection of scripts that can be used as part of a deployment process.",
-  "main": "src/utils",
+  "main": "dist/module/utils",
   "bin": {
     "check-built-asset-size": "./nodeApps/checkBuiltAssetSize.js",
     "create-private-release": "./nodeApps/createPrivateRelease.sh",
@@ -11,13 +11,18 @@
     "generate-signed-file": "./nodeApps/generateSignedFile.js"
   },
   "scripts": {
-    "build": "echo 👀  no build script here yet...",
+    "build": "babel src --out-dir dist/module",
     "coverage": "nyc mocha && nyc check-coverage",
     "test": "npm run coverage",
     "prerelease": "nodeApps/preRelease.js",
     "release": "nodeApps/release.js",
     "lint": "standard",
     "ci": "npm run lint && MOCHA_FILE=$CIRCLE_TEST_REPORTS/junit/test-results.xml nyc mocha --reporter mocha-junit-reporter && nyc check-coverage"
+  },
+  "babel": {
+    "presets": [
+      "env"
+    ]
   },
   "nyc": {
     "all": true,
@@ -30,6 +35,8 @@
     "branches": 100,
     "functions": 100,
     "exclude": [
+      "src/labelPullRequestWithMetricMovement.js",
+      "dist",
       "coverage",
       "nodeApps"
     ]
@@ -54,16 +61,20 @@
   "license": "UNLICENSED",
   "dependencies": {
     "async": "^2.3.0",
+    "github": "13.1.0",
     "simple-git": "1.85.0"
   },
   "devDependencies": {
+    "babel-cli": "6.26.0",
+    "babel-core": "6.26.0",
+    "babel-preset-env": "1.6.1",
     "chai": "^3.5.0",
     "dirty-chai": "^1.2.2",
-    "mocha": "^3.2.0",
-    "mocha-junit-reporter": "^1.13.0",
+    "mocha": "3.5.3",
+    "mocha-junit-reporter": "1.15.0",
     "nyc": "^10.1.2",
-    "sinon": "^1.17.6",
-    "sinon-chai": "^2.8.0",
+    "sinon": "2.4.1",
+    "sinon-chai": "2.14.0",
     "standard": "^9.0.1"
   },
   "directories": {

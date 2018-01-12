@@ -9,6 +9,7 @@ describe('utils', function () {
 
   beforeEach(function () {
     sandbox.stub(childProcess, 'exec').yields()
+    sandbox.stub(utils, 'labelPullRequestWithMetricMovement').resolves()
     env = JSON.parse(JSON.stringify(process.env))
     callback = sandbox.stub()
   })
@@ -621,6 +622,28 @@ describe('utils', function () {
 
       it('warns us twice', function () {
         expect(console.warn).to.have.been.calledTwice()
+      })
+    })
+
+    describe('when we have pr env var from circle', function () {
+      beforeEach(function () {
+        process.env.CI_PULL_REQUEST = 'foo/667'
+        utils.reportSize(777, 666, callback)
+      })
+
+      it('yields', function () {
+        expect(callback).to.have.been.calledOnce()
+      })
+    })
+
+    describe('when we do not have env var from circle', function () {
+      beforeEach(function () {
+        delete process.env.CI_PULL_REQUEST
+        utils.reportSize(777, 666, callback)
+      })
+
+      it('yields', function () {
+        expect(callback).to.have.been.calledOnce()
       })
     })
   })
