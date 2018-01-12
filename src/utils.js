@@ -1,7 +1,6 @@
 const async = require('async')
 const childProcess = require('child_process')
 const fs = require('fs')
-const git = require('simple-git')()
 
 const utils = module.exports = {}
 
@@ -59,25 +58,30 @@ utils.checkPrerequisites = callback => {
 }
 
 utils.getEmail = callback => {
-  git.raw(['config', '--get', 'user.email'], callback)
+  const cmd = 'git config --get user.email'
+  utils.exec(cmd, callback)
 }
 
 utils.setEmail = (email, callback) => {
-  if (!email) git.addConfig('user.email', process.env.GITHUB_EMAIL)
+  const cmd = `git config user.email ${process.env.GITHUB_EMAIL}`
+  if (!email) return utils.exec(cmd, callback)
   callback()
 }
 
 utils.getUser = callback => {
-  git.raw(['config', '--get', 'user.name'], callback)
+  const cmd = 'git config --get user.name'
+  utils.exec(cmd, callback)
 }
 
 utils.setUser = (name, callback) => {
-  if (!name) git.addConfig('user.name', process.env.GITHUB_EMAIL)
+  const cmd = `git config user.name ${process.env.GITHUB_USER}`
+  if (!name) return utils.exec(cmd, callback)
   callback()
 }
 
 utils.getBranch = callback => {
-  git.revparse(['--abbrev-ref', 'HEAD'], (err, branch) => {
+  const cmd = 'git rev-parse --abbrev-ref HEAD'
+  utils.exec(cmd, (err, branch) => {
     callback(err, process.env.TRAVIS_BRANCH || process.env.CIRCLE_BRANCH || ('' + branch).trim())
   })
 }
