@@ -1,7 +1,6 @@
 const async = require('async')
 const childProcess = require('child_process')
 const fs = require('fs')
-const git = require('simple-git')()
 
 const utils = module.exports = {}
 
@@ -59,25 +58,30 @@ utils.checkPrerequisites = callback => {
 }
 
 utils.getEmail = callback => {
-  git.raw(['config', '--get', 'user.email'], callback)
+  const cmd = 'git config --get user.email'
+  utils.exec(cmd, callback)
 }
 
 utils.setEmail = (email, callback) => {
-  if (!email) git.addConfig('user.email', process.env.GITHUB_EMAIL)
+  const cmd = `git config user.email ${process.env.GITHUB_EMAIL}`
+  if (!email) return utils.exec(cmd, callback)
   callback()
 }
 
 utils.getUser = callback => {
-  git.raw(['config', '--get', 'user.name'], callback)
+  const cmd = 'git config --get user.name'
+  utils.exec(cmd, callback)
 }
 
 utils.setUser = (name, callback) => {
-  if (!name) git.addConfig('user.name', process.env.GITHUB_EMAIL)
+  const cmd = `git config user.name ${process.env.GITHUB_USER}`
+  if (!name) return utils.exec(cmd, callback)
   callback()
 }
 
 utils.getBranch = callback => {
-  git.revparse(['--abbrev-ref', 'HEAD'], (err, branch) => {
+  const cmd = 'git rev-parse --abbrev-ref HEAD'
+  utils.exec(cmd, (err, branch) => {
     callback(err, process.env.TRAVIS_BRANCH || process.env.CIRCLE_BRANCH || ('' + branch).trim())
   })
 }
@@ -176,7 +180,7 @@ utils.reportSize = (size, previousSize, callback) => {
   const delta = ((size - previousSize) / previousSize) * 100
   if (delta > 0) {
     console.warn(`⚠️  file size has gone up from ${previousSize} to ${size} bytes`)
-    if (delta > 1) console.warn('🙀  this is more than 1% increase!')
+    if (delta > 1) console.warn(`🙀  this is more than ${parseInt(delta, 10)}% increase!`)
   } else if (delta < -1) {
     console.info('🐭  good file size reducing!')
   }
@@ -186,7 +190,7 @@ utils.reportSize = (size, previousSize, callback) => {
 // relies on the built asset being named for the repo
 utils.getBuiltSizeOfBranch = (branch, callback) => {
   const file = `${utils.distFolder}/${utils.name}.min.js`
-  utils.exec(`git checkout ${utils.distFolder}/ && git checkout ${branch} && NODE_ENV=production npm run build > /dev/null`, err => {
+  utils.exec(`git checkout ${utils.distFolder}/; git checkout ${branch} && NODE_ENV=production npm run build > /dev/null`, err => {
     if (err) return callback(err)
     utils.getSize(file, callback)
   })
