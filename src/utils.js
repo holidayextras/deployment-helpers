@@ -65,9 +65,11 @@ utils.getEmail = callback => {
 }
 
 utils.setEmail = (email, callback) => {
+  if (email) return callback()
   const cmd = `git config user.email ${process.env.GITHUB_EMAIL}`
-  if (!email) return utils.exec(cmd, callback)
-  callback()
+  utils.exec(cmd, () => {
+    callback()
+  })
 }
 
 utils.getUser = callback => {
@@ -78,9 +80,11 @@ utils.getUser = callback => {
 }
 
 utils.setUser = (name, callback) => {
+  if (name) return callback()
   const cmd = `git config user.name ${process.env.GITHUB_USER}`
-  if (!name) return utils.exec(cmd, callback)
-  callback()
+  utils.exec(cmd, () => {
+    callback()
+  })
 }
 
 utils.getBranch = callback => {
