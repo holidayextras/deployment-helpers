@@ -11,7 +11,7 @@
     "generate-signed-file": "./nodeApps/generateSignedFile.js"
   },
   "scripts": {
-    "build": "echo 👀  no build script here yet..."
+    "build": "echo 👀  no build script here yet...",
     "coverage": "nyc mocha && nyc check-coverage",
     "test": "npm run coverage",
     "prerelease": "nodeApps/preRelease.js",
