@@ -5,18 +5,22 @@ const childProcess = require('child_process')
 
 describe('utils', function () {
   let callback = null
+  let env = null
 
   beforeEach(function () {
+    sandbox.stub(childProcess, 'exec').yields()
+    env = JSON.parse(JSON.stringify(process.env))
     callback = sandbox.stub()
   })
 
   afterEach(function () {
+    process.env = JSON.parse(JSON.stringify(env))
     sandbox.restore()
   })
 
   describe('exec', function () {
     beforeEach(function () {
-      sandbox.stub(childProcess, 'exec').yields(null, 'foo', 'bar')
+      childProcess.exec.yields(null, 'foo', 'bar')
       utils.exec('CMD', callback)
     })
 
@@ -215,10 +219,36 @@ describe('utils', function () {
   })
 
   describe('getBranch', function () {
-    it('does not throw', function () {
-      expect(function () {
-        utils.getBranch(callback)
-      }).not.to.throw()
+    describe('with travis', function () {
+      beforeEach(function () {
+        process.env.TRAVIS_BRANCH = 'foo'
+      })
+
+      it('does not throw', function () {
+        expect(function () {
+          utils.getBranch(callback)
+        }).not.to.throw()
+      })
+    })
+
+    describe('with circle', function () {
+      beforeEach(function () {
+        process.env.CIRCLE_BRANCH = 'foo'
+      })
+
+      it('does not throw', function () {
+        expect(function () {
+          utils.getBranch(callback)
+        }).not.to.throw()
+      })
+    })
+
+    describe('with neither', function () {
+      it('does not throw', function () {
+        expect(function () {
+          utils.getBranch(callback)
+        }).not.to.throw()
+      })
     })
   })
 
@@ -353,6 +383,32 @@ describe('utils', function () {
       })
 
       it('just yields', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly()
+      })
+    })
+
+    describe('when we have circle env vars', function () {
+      beforeEach(function () {
+        delete process.env.TRAVIS_JOB_NUMBER
+        process.env.CIRCLE_BUILD_NUM = true
+        utils.tagVersion('TAG', 'NOTES', callback)
+      })
+
+      it('yields', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly()
+      })
+    })
+
+    describe('when we have travis env vars', function () {
+      beforeEach(function () {
+        delete process.env.CIRCLE_BUILD_NUM
+        process.env.TRAVIS_JOB_NUMBER = true
+        utils.tagVersion('TAG', 'NOTES', callback)
+      })
+
+      it('yields', function () {
         expect(callback).to.have.been.calledOnce()
           .and.calledWithExactly()
       })

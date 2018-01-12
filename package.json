@@ -1,6 +1,6 @@
 {
   "name": "deployment-helpers",
-  "version": "1.8.3",
+  "version": "1.8.4",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "main": "src/utils",
   "bin": {
@@ -24,9 +24,9 @@
       "html",
       "text"
     ],
-    "statements": 90,
-    "lines": 90,
-    "branches": 90,
+    "statements": 100,
+    "lines": 100,
+    "branches": 100,
     "functions": 100,
     "exclude": [
       "coverage",

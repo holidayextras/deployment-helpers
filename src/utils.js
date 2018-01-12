@@ -176,7 +176,7 @@ utils.reportSize = (size, previousSize, callback) => {
   const delta = ((size - previousSize) / previousSize) * 100
   if (delta > 0) {
     console.warn(`⚠️  file size has gone up from ${previousSize} to ${size} bytes`)
-    if (delta > 1) console.warn('🙀  this is more than 1% increase!')
+    if (delta > 1) console.warn(`🙀  this is more than ${parseInt(delta, 10)}% increase!`)
   } else if (delta < -1) {
     console.info('🐭  good file size reducing!')
   }
@@ -186,7 +186,7 @@ utils.reportSize = (size, previousSize, callback) => {
 // relies on the built asset being named for the repo
 utils.getBuiltSizeOfBranch = (branch, callback) => {
   const file = `${utils.distFolder}/${utils.name}.min.js`
-  utils.exec(`git checkout ${utils.distFolder}/ && git checkout ${branch} && NODE_ENV=production npm run build > /dev/null`, err => {
+  utils.exec(`git checkout ${utils.distFolder}/; git checkout ${branch} && NODE_ENV=production npm run build > /dev/null`, err => {
     if (err) return callback(err)
     utils.getSize(file, callback)
   })
