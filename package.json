@@ -1,6 +1,6 @@
 {
   "name": "deployment-helpers",
-  "version": "1.8.5",
+  "version": "1.8.6",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "main": "src/utils",
   "bin": {
@@ -11,6 +11,7 @@
     "generate-signed-file": "./nodeApps/generateSignedFile.js"
   },
   "scripts": {
+    "build": "echo 👀  no build script here yet..."
     "coverage": "nyc mocha && nyc check-coverage",
     "test": "npm run coverage",
     "prerelease": "nodeApps/preRelease.js",
