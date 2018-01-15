@@ -53,7 +53,8 @@
   "owner": "payment-platform",
   "license": "UNLICENSED",
   "dependencies": {
-    "async": "^2.3.0"
+    "async": "^2.3.0",
+    "simple-git": "1.85.0"
   },
   "devDependencies": {
     "chai": "^3.5.0",
