@@ -1,6 +1,6 @@
 {
   "name": "deployment-helpers",
-  "version": "1.8.8",
+  "version": "1.9.0",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "main": "dist/module/utils",
   "bin": {
@@ -62,8 +62,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "async": "^2.3.0",
-    "github": "13.1.0",
-    "simple-git": "1.85.0"
+    "github": "13.1.0"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",

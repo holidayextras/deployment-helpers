@@ -36,6 +36,23 @@ describe('utils', function () {
     })
   })
 
+  describe('execAndIgnoreOutput', function () {
+    beforeEach(function () {
+      childProcess.exec.yields('foo', 'bar', 'etc')
+      utils.execAndIgnoreOutput('CMD', callback)
+    })
+
+    it('proxies childProcess.exec', function () {
+      expect(childProcess.exec).to.have.been.calledOnce()
+        .and.calledWith('CMD')
+    })
+
+    it('yields, throwing away stdout and stderr', function () {
+      expect(callback).to.have.been.calledOnce()
+        .and.calledWithExactly('foo')
+    })
+  })
+
   describe('createVersionedFile', function () {
     beforeEach(function () {
       sandbox.stub(utils, 'exec').yields()
@@ -659,6 +676,53 @@ describe('utils', function () {
     })
   })
 
+  describe('commit', function () {
+    beforeEach(function () {
+      sandbox.stub(utils, 'commitMessageWithCILinks').returns('MESSAGE')
+      sandbox.stub(utils, 'exec').yields()
+      utils.commit(callback)
+    })
+
+    it('commits', function () {
+      expect(utils.exec).to.have.been.calledOnce()
+        .and.calledWith(`git commit -m 'MESSAGE [skip ci]'`)
+    })
+  })
+
+  describe('build', function () {
+    beforeEach(function () {
+      sandbox.stub(utils, 'execAndIgnoreOutput').yields()
+    })
+
+    describe('when there is no build script', function () {
+      beforeEach(function () {
+        delete process.env.npm_package_scripts_build
+        utils.build(callback)
+      })
+
+      it('yields', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly()
+      })
+    })
+
+    describe('when all is ok', function () {
+      beforeEach(function () {
+        utils.build(callback)
+      })
+
+      it('builds', function () {
+        expect(utils.execAndIgnoreOutput).to.have.been.calledOnce()
+          .and.calledWith('NODE_ENV=production npm run build')
+      })
+
+      it('yields', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly()
+      })
+    })
+  })
+
   describe('getBuiltSizeOfBranch', function () {
     beforeEach(function () {
       sandbox.stub(utils, 'exec').yields()
@@ -869,6 +933,99 @@ describe('utils', function () {
 
       it('warns us twice', function () {
         expect(console.warn).to.have.been.calledTwice()
+      })
+    })
+  })
+
+  describe('addFile', function () {
+    beforeEach(function () {
+      sandbox.stub(utils, 'execAndIgnoreOutput')
+      utils.addFile('foo', 'CALLBACK')
+    })
+
+    it('executes git cmd', function () {
+      expect(utils.execAndIgnoreOutput).to.have.been.calledOnce()
+        .and.calledWithExactly('git add foo', 'CALLBACK')
+    })
+  })
+
+  describe('push', function () {
+    beforeEach(function () {
+      sandbox.stub(utils, 'execAndIgnoreOutput')
+      utils.push('CALLBACK')
+    })
+
+    it('executes git cmd', function () {
+      expect(utils.execAndIgnoreOutput).to.have.been.calledOnce()
+        .and.calledWithExactly('git config --global push.default matching; git push', 'CALLBACK')
+    })
+  })
+
+  describe('updateChangelog', function () {
+    beforeEach(function () {
+      sandbox.stub(fs, 'readFile').yields(null, '# changelog etc')
+      sandbox.stub(fs, 'writeFile').yields()
+    })
+
+    describe('when reading errors', function () {
+      beforeEach(function () {
+        fs.readFile.yields('oops')
+        utils.updateChangelog('NOTES', callback)
+      })
+
+      it('tries to read the file', function () {
+        expect(fs.readFile).to.have.been.calledOnce()
+          .and.calledWith('CHANGELOG.md')
+      })
+
+      it('yields the error', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly('oops')
+      })
+    })
+
+    describe('when writing errors', function () {
+      beforeEach(function () {
+        fs.writeFile.yields('oops')
+        utils.updateChangelog('NOTES', callback)
+      })
+
+      it('reads the file', function () {
+        expect(fs.readFile).to.have.been.calledOnce()
+          .and.calledWith('CHANGELOG.md')
+      })
+
+      it('tries to write the file', function () {
+        const multilineRegex = sandbox.match(/Changelog[\s\S]+NOTES/)
+        expect(fs.writeFile).to.have.been.calledOnce()
+          .and.calledWith('CHANGELOG.md', multilineRegex)
+      })
+
+      it('yields the error', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly('oops')
+      })
+    })
+
+    describe('when all is ok', function () {
+      beforeEach(function () {
+        utils.updateChangelog('NOTES', callback)
+      })
+
+      it('reads the file', function () {
+        expect(fs.readFile).to.have.been.calledOnce()
+          .and.calledWith('CHANGELOG.md')
+      })
+
+      it('writes the file', function () {
+        const multilineRegex = sandbox.match(/Changelog[\s\S]+NOTES/)
+        expect(fs.writeFile).to.have.been.calledOnce()
+          .and.calledWith('CHANGELOG.md', multilineRegex)
+      })
+
+      it('yields', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly()
       })
     })
   })

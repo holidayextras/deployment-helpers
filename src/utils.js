@@ -16,10 +16,13 @@ utils.name = process.env.npm_package_name
 utils.ownerAndName = `holidayextras/${utils.name}`
 utils.distFolder = process.env.DIST_FOLDER || 'dist'
 const repo = ('' + process.env.npm_package_repository_url).split('/')
+console.info('process.env.npm_package_repository_url got', repo)
 /* istanbul ignore else */
 if (repo.pop() === `${utils.name}.git`) {
   utils.ownerAndName = `${repo.pop()}/${utils.name}`
+  console.info('so owner and name', utils.ownerAndName)
 }
+console.info('🤔 can we get this from env vars?')
 
 utils.getIntegrity = (file, callback) => {
   utils.getSignature(file, (err, signature) => {
@@ -30,8 +33,13 @@ utils.getIntegrity = (file, callback) => {
 
 utils.exec = (cmd, callback) => {
   childProcess.exec(cmd, (err, stdout, stderr) => {
-    // console.info(cmd, 'got', err, stdout, stderr)
     callback(err, stdout)
+  })
+}
+
+utils.execAndIgnoreOutput = (cmd, callback) => {
+  utils.exec(cmd, err => {
+    callback(err)
   })
 }
 
@@ -122,13 +130,53 @@ utils.getCommitMessagesSinceLastRelease = callback => {
   })
 }
 
-utils.tagVersion = (tag, notes, callback) => {
+utils.commit = callback => {
+  const message = utils.commitMessageWithCILinks() + ' [skip ci]'
+  utils.exec(`git commit -m '${message}'`, err => {
+    callback(err)
+  })
+}
+
+utils.push = callback => {
+  utils.execAndIgnoreOutput(`git config --global push.default matching; git push`, callback)
+}
+
+// relies on something like # changelog being in the CHANGELOG already
+utils.updateChangelog = (notes, callback) => {
+  fs.readFile('CHANGELOG.md', 'utf-8', (readErr, contents) => {
+    if (readErr) return callback(readErr)
+    const existingLines = new RegExp(`.*${utils.versionTag}.*`, 'g')
+    const newContents = contents
+      .replace(existingLines, '')
+      .replace(/\n\s*\n/g, '\n')
+      .replace(/# Changelog/gi, `# Changelog \n\n- ${utils.versionTag}${notes}`)
+    fs.writeFile('CHANGELOG.md', newContents, function (writeErr) {
+      if (writeErr) return callback(writeErr)
+      callback()
+    })
+  })
+}
+
+utils.addFile = (file, callback) => {
+  utils.execAndIgnoreOutput(`git add ${file}`, callback)
+}
+
+utils.addDist = utils.addFile.bind(null, 'dist')
+
+utils.addChangelog = utils.addFile.bind(null, 'CHANGELOG.md')
+
+utils.commitMessageWithCILinks = () => {
   let message = ':airplane: Release via CI build '
   if (process.env.CIRCLE_BUILD_NUM) {
     message = message + `[${process.env.CIRCLE_BUILD_NUM}](https://circleci.com/gh/${utils.ownerAndName}/${process.env.CIRCLE_BUILD_NUM})`
   } else if (process.env.TRAVIS_JOB_NUMBER) {
     message = message + `[${process.env.TRAVIS_JOB_ID}](https://travis-ci.com/${utils.ownerAndName}/jobs/${process.env.TRAVIS_JOB_ID})`
   }
+  return message
+}
+
+utils.tagVersion = (tag, notes, callback) => {
+  const message = utils.commitMessageWithCILinks()
   utils.exec(`git rev-parse HEAD`, (err, sha) => {
     if (err) return callback(err)
     const body = [message, notes].join('\n').replace(/"/g, '')
@@ -217,6 +265,11 @@ utils.reportSize = (current, previous, callback) => {
     })
   }
   callback()
+}
+
+utils.build = callback => {
+  if (!process.env.npm_package_scripts_build) return callback()
+  utils.execAndIgnoreOutput('NODE_ENV=production npm run build', callback)
 }
 
 utils.getBuiltSizeOfBranch = (branch, callback) => {
