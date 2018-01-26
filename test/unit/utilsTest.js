@@ -220,9 +220,26 @@ describe('utils', function () {
   })
 
   describe('getBranch', function () {
+    beforeEach(function () {
+      delete process.env.CIRCLE_BRANCH
+      delete process.env.TRAVIS_BRANCH
+      delete process.env.TRAVIS_PULL_REQUEST_BRANCH
+    })
+
+    describe('with travis pr', function () {
+      beforeEach(function () {
+        process.env.TRAVIS_PULL_REQUEST_BRANCH = 'foo'
+      })
+
+      it('does not throw', function () {
+        expect(function () {
+          utils.getBranch(callback)
+        }).not.to.throw()
+      })
+    })
+
     describe('with travis', function () {
       beforeEach(function () {
-        delete process.env.CIRCLE_BRANCH
         process.env.TRAVIS_BRANCH = 'foo'
       })
 
@@ -235,7 +252,6 @@ describe('utils', function () {
 
     describe('with circle', function () {
       beforeEach(function () {
-        delete process.env.TRAVIS_BRANCH
         process.env.CIRCLE_BRANCH = 'foo'
       })
 
@@ -247,11 +263,6 @@ describe('utils', function () {
     })
 
     describe('with neither', function () {
-      beforeEach(function () {
-        delete process.env.CIRCLE_BRANCH
-        delete process.env.TRAVIS_BRANCH
-      })
-
       it('does not throw', function () {
         expect(function () {
           utils.getBranch(callback)
@@ -863,6 +874,11 @@ describe('utils', function () {
   })
 
   describe('getBuiltSizeOfBranch', function () {
+    beforeEach(function () {
+      sandbox.stub(utils, 'getSize').yields(null, 666)
+      sandbox.stub(utils, 'getBranch').yields(null, 'foo')
+    })
+
     it('does not throw', function () {
       expect(function () {
         utils.getBuiltSizeOfBranch('foo', callback)
@@ -871,6 +887,11 @@ describe('utils', function () {
   })
 
   describe('getBuiltAssetStats', function () {
+    beforeEach(function () {
+      sandbox.stub(utils, 'getSize').yields(null, 666)
+      sandbox.stub(utils, 'getBranch').yields(null, 'foo')
+    })
+
     it('does not throw', function () {
       expect(function () {
         utils.getBuiltAssetStats(callback)
