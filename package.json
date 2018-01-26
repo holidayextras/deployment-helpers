@@ -1,6 +1,6 @@
 {
   "name": "deployment-helpers",
-  "version": "1.8.7",
+  "version": "1.8.8",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "main": "dist/module/utils",
   "bin": {
@@ -13,6 +13,7 @@
   "scripts": {
     "build": "babel src --out-dir dist/module",
     "coverage": "nyc mocha && nyc check-coverage",
+    "checksize": "BUILT_ASSET=dist/module/utils.js ./nodeApps/checkBuiltAssetSize.js",
     "test": "npm run coverage",
     "prerelease": "nodeApps/preRelease.js",
     "release": "nodeApps/release.js",

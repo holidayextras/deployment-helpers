@@ -5,6 +5,7 @@ machine:
 test:
   override:
     - npm run ci
+    - npm run checksize
 
 notify:
   webhooks:

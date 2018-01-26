@@ -92,7 +92,7 @@ utils.setUser = (name, callback) => {
 utils.getBranch = callback => {
   const cmd = 'git rev-parse --abbrev-ref HEAD'
   utils.exec(cmd, (err, branch) => {
-    callback(err, process.env.TRAVIS_BRANCH || process.env.CIRCLE_BRANCH || ('' + branch).trim())
+    callback(err, process.env.TRAVIS_PULL_REQUEST_BRANCH || process.env.TRAVIS_BRANCH || process.env.CIRCLE_BRANCH || ('' + branch).trim())
   })
 }
 
@@ -194,31 +194,33 @@ utils.reportSize = (current, previous, callback) => {
   } else if (delta < -1) {
     console.info('🐭  good file size reducing!')
   }
-  let prNumber = process.env.TRAVIS_PR_NUMBER
+  let prNumber = process.env.TRAVIS_PULL_REQUEST
   if (process.env.CI_PULL_REQUEST) {
     prNumber = ('' + process.env.CI_PULL_REQUEST).split('/').pop()
   }
+  prNumber = parseInt(prNumber, 10)
   /* istanbul ignore next */
-  utils.labelPullRequestWithMetricMovement({
-    githubToken: process.env.GITHUB_API_TOKEN,
-    ownerAndRepo: utils.ownerAndName,
-    prNumber,
-    metrics: { previous, current },
-    desirableTrajectory: 'DECREASE',
-    minorPercentageThreshold: 1,
-    minorValueThreshold: 300,
-    majorPercentageThreshold: 3,
-    majorValueThreshold: 2000,
-    labelModifier: 'page weight'
-  }).catch(err => {
-    console.error('Problem applying page weight label', err)
-  })
+  if (prNumber) {
+    utils.labelPullRequestWithMetricMovement({
+      githubToken: process.env.GITHUB_API_TOKEN,
+      ownerAndRepo: utils.ownerAndName,
+      prNumber,
+      metrics: { previous, current },
+      desirableTrajectory: 'DECREASE',
+      minorPercentageThreshold: 1,
+      minorValueThreshold: 300,
+      majorPercentageThreshold: 3,
+      majorValueThreshold: 2000,
+      labelModifier: 'page weight'
+    }).catch(err => {
+      console.error('Problem applying page weight label', err)
+    })
+  }
   callback()
 }
 
-// relies on the built asset being named for the repo
 utils.getBuiltSizeOfBranch = (branch, callback) => {
-  const file = `${utils.distFolder}/${utils.name}.min.js`
+  const file = process.env.BUILT_ASSET || `${utils.distFolder}/${utils.name}.min.js`
   utils.exec(`git checkout ${utils.distFolder} 2> /dev/null; git checkout ${branch} && NODE_ENV=production npm run build > /dev/null`, err => {
     if (err) return callback(err)
     utils.getSize(file, callback)
@@ -230,7 +232,10 @@ utils.getBuiltAssetStats = callback => {
   utils.getBranch((err, branch) => {
     if (err) return callback(err)
     utils.getBuiltSizeOfBranch('master', (err, previousSize) => {
-      if (err) return callback(err)
+      if (err) {
+        console.error('We cannot get the size of master; did we do a shallow clone?')
+        return callback(err)
+      }
       utils.getBuiltSizeOfBranch(branch, (err, size) => {
         if (err) return callback(err)
         utils.reportSize(size, previousSize, callback)
