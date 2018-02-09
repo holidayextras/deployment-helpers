@@ -23,6 +23,14 @@ describe('release', function () {
 
   describe('when all is ok', function () {
     before(function (done) {
+      /*  If I try to test this with
+          childProcess.execFile('nodeApps/release, callback)
+          then I can't stub the methods inside.
+          I would have to make the script more complex to be able to test it,
+          so setting a timeout seems the best way.
+          I don't think we normally test things like this, the thing it is
+          replacing does not have a test like this.
+      */
       require('../../nodeApps/release')
       setTimeout(done, 1000)
     })
@@ -35,9 +43,5 @@ describe('release', function () {
       expect(console.info).to.have.been.calledOnce()
         .and.calledWithExactly('done')
     })
-
-    /* it('did not have to warn us', function () {
-      expect(console.warn).not.to.have.been.called()
-    }) */
   })
 })
