@@ -18,7 +18,8 @@
     "prerelease": "nodeApps/preRelease.js",
     "release": "nodeApps/release.js",
     "lint": "standard",
-    "ci": "npm run lint && MOCHA_FILE=$CIRCLE_TEST_REPORTS/junit/test-results.xml nyc mocha --reporter mocha-junit-reporter && nyc check-coverage"
+    "circleci": "npm run lint && MOCHA_FILE=$CIRCLE_TEST_REPORTS/junit/test-results.xml nyc mocha --reporter mocha-junit-reporter && nyc check-coverage",
+    "ci": "npm run lint && npm run coverage"
   },
   "babel": {
     "presets": [

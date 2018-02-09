@@ -236,6 +236,39 @@ describe('utils', function () {
     })
   })
 
+  describe('commitMessageWithCIID', function () {
+    beforeEach(function () {
+      delete process.env.CIRCLE_BUILD_NUM
+      delete process.env.TRAVIS_JOB_ID
+    })
+
+    describe('on circleci', function () {
+      beforeEach(function () {
+        process.env.CIRCLE_BUILD_NUM = 'CIRCLE'
+      })
+
+      it('returns a string', function () {
+        expect(utils.commitMessageWithCIID()).to.equal(':airplane: Release via CI build CIRCLE')
+      })
+    })
+
+    describe('on travis', function () {
+      beforeEach(function () {
+        process.env.TRAVIS_JOB_ID = 'TRAVIS'
+      })
+
+      it('returns a string', function () {
+        expect(utils.commitMessageWithCIID()).to.equal(':airplane: Release via CI build TRAVIS')
+      })
+    })
+
+    describe('on neither', function () {
+      it('returns a string', function () {
+        expect(utils.commitMessageWithCIID()).to.equal(':airplane: Release via CI build ')
+      })
+    })
+  })
+
   describe('getBranch', function () {
     beforeEach(function () {
       delete process.env.CIRCLE_BRANCH
@@ -708,6 +741,7 @@ describe('utils', function () {
 
     describe('when all is ok', function () {
       beforeEach(function () {
+        process.env.npm_package_scripts_build = 'BUILD'
         utils.build(callback)
       })
 
