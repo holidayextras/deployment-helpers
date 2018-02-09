@@ -28,6 +28,7 @@ const getSignature = (file, callback) => {
   })
 }
 
+// specific to a repo with a signed file, different to the version in utils
 const getCommitMessagesSinceLastRelease = (versionedFile, signature, callback) => {
   utils.getCommitMessagesSinceLastRelease((err, notes) => {
     callback(err, notes, versionedFile, signature)
