@@ -678,7 +678,7 @@ describe('utils', function () {
 
   describe('commit', function () {
     beforeEach(function () {
-      sandbox.stub(utils, 'commitMessageWithCILinks').returns('MESSAGE')
+      sandbox.stub(utils, 'commitMessageWithCIID').returns('MESSAGE')
       sandbox.stub(utils, 'exec').yields()
       utils.commit(callback)
     })

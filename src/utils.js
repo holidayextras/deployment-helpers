@@ -16,13 +16,11 @@ utils.name = process.env.npm_package_name
 utils.ownerAndName = `holidayextras/${utils.name}`
 utils.distFolder = process.env.DIST_FOLDER || 'dist'
 const repo = ('' + process.env.npm_package_repository_url).split('/')
-console.info('process.env.npm_package_repository_url got', repo)
 /* istanbul ignore else */
 if (repo.pop() === `${utils.name}.git`) {
   utils.ownerAndName = `${repo.pop()}/${utils.name}`
-  console.info('so owner and name', utils.ownerAndName)
+  console.info('got owner and name', utils.ownerAndName, 'from', process.env.npm_package_repository_url, 'get this from env vars?')
 }
-console.info('🤔 can we get this from env vars?')
 
 utils.getIntegrity = (file, callback) => {
   utils.getSignature(file, (err, signature) => {
