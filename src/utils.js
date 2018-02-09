@@ -131,7 +131,7 @@ utils.getCommitMessagesSinceLastRelease = callback => {
 }
 
 utils.commit = callback => {
-  const message = utils.commitMessageWithCILinks() + ' [skip ci]'
+  const message = utils.commitMessageWithCIID() + ' [skip ci]'
   utils.exec(`git commit -m '${message}'`, err => {
     callback(err)
   })
@@ -165,12 +165,17 @@ utils.addDist = utils.addFile.bind(null, 'dist')
 
 utils.addChangelog = utils.addFile.bind(null, 'CHANGELOG.md')
 
+utils.commitMessageWithCIID = () => {
+  return `:airplane: Release via CI build ${process.env.CIRCLE_BUILD_NUM || process.env.TRAVIS_JOB_ID || ''}`
+}
+
 utils.commitMessageWithCILinks = () => {
-  let message = ':airplane: Release via CI build '
+  let message = utils.commitMessageWithCIID()
   if (process.env.CIRCLE_BUILD_NUM) {
-    message = message + `[${process.env.CIRCLE_BUILD_NUM}](https://circleci.com/gh/${utils.ownerAndName}/${process.env.CIRCLE_BUILD_NUM})`
-  } else if (process.env.TRAVIS_JOB_NUMBER) {
-    message = message + `[${process.env.TRAVIS_JOB_ID}](https://travis-ci.com/${utils.ownerAndName}/jobs/${process.env.TRAVIS_JOB_ID})`
+    return `${message} https://circleci.com/gh/${utils.ownerAndName}/${process.env.CIRCLE_BUILD_NUM}`
+  }
+  if (process.env.TRAVIS_JOB_NUMBER) {
+    return `${message} https://travis-ci.com/${utils.ownerAndName}/jobs/${process.env.TRAVIS_JOB_ID}`
   }
   return message
 }
