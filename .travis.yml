@@ -1,0 +1,26 @@
+sudo: false
+
+language: node_js
+
+cache:
+  directories:
+  - node_modules
+
+git:
+  depth: false
+
+script:
+  - npm run ci
+  - npm run checksize
+
+notifications:
+  webhooks:
+    - https://us-central1-hx-data-production.cloudfunctions.net/deploymentNotifier
+
+deploy:
+  - provider: script
+    script:
+      - RELEASE_BRANCH=master npm run release
+    skip_cleanup: true
+    on:
+      branch: master

@@ -2,11 +2,25 @@
 
 This project holds various deployment scripts that are used with AWS CodeDeploy and releasing our private NPM modules.
 
+[![Build Status](https://travis-ci.org/holidayextras/deployment-helpers.png?branch=master)](https://travis-ci.org/holidayextras/deployment-helpers)
+
 ## Node Apps
 
 ### `createPrivateRelease.sh`
 
 This will check if the `package.json` version has been updated for a project and then create a new release on github after running `npm build` and commiting any changed release assets in the `dist` directory.
+
+### `release.js`
+
+`createPrivateRelease.sh` but rewritten in javascript. Also tags and releases by major and minor version for you, and updates CHANGELOG.md
+
+### `generateSignedFile.js`
+
+builds, tags, generates in integrity hash for the built script, and updates CHANGELOG.md
+
+### `checkBuiltAssetSize.js`
+
+checks your built asset size, and tags your pr accordingly
 
 ### `cachedInstallModules.sh`
 

@@ -1,6 +1,6 @@
 {
   "name": "deployment-helpers",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "main": "dist/module/utils",
   "bin": {
@@ -18,7 +18,8 @@
     "prerelease": "nodeApps/preRelease.js",
     "release": "nodeApps/release.js",
     "lint": "standard",
-    "ci": "npm run lint && MOCHA_FILE=$CIRCLE_TEST_REPORTS/junit/test-results.xml nyc mocha --reporter mocha-junit-reporter && nyc check-coverage"
+    "circleci": "npm run lint && MOCHA_FILE=$CIRCLE_TEST_REPORTS/junit/test-results.xml nyc mocha --reporter mocha-junit-reporter && nyc check-coverage",
+    "ci": "npm run lint && npm run coverage"
   },
   "babel": {
     "presets": [
@@ -61,8 +62,8 @@
   "owner": "payment-platform",
   "license": "UNLICENSED",
   "dependencies": {
-    "async": "^2.3.0",
-    "github": "13.1.0"
+    "@octokit/rest": "14.0.9",
+    "async": "^2.3.0"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",
@@ -72,8 +73,8 @@
     "dirty-chai": "^1.2.2",
     "mocha": "3.5.3",
     "mocha-junit-reporter": "1.15.0",
-    "nyc": "^10.1.2",
-    "sinon": "2.4.1",
+    "nyc": "10.3.2",
+    "sinon": "4.4.0",
     "sinon-chai": "2.14.0",
     "standard": "^9.0.1"
   },
