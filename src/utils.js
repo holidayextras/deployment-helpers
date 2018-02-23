@@ -104,7 +104,7 @@ utils.getBranch = callback => {
 
 utils.checkBranch = (releaseBranch, callback) => {
   utils.getBranch((unhandledErr, currentBranch) => {
-    if (releaseBranch !== currentBranch) return callback(`Skip this on ${currentBranch} on (${releaseBranch} only)`)
+    if (releaseBranch !== currentBranch) return callback(`skip this on ${currentBranch} (on ${releaseBranch} only)`)
     callback()
   })
 }
