@@ -101,7 +101,7 @@ utils.getBranch = function (callback) {
 
 utils.checkBranch = function (releaseBranch, callback) {
   utils.getBranch(function (unhandledErr, currentBranch) {
-    if (releaseBranch !== currentBranch) return callback('Skip this on ' + currentBranch + ' on (' + releaseBranch + ' only)');
+    if (releaseBranch !== currentBranch) return callback('skip this on ' + currentBranch + ' (on ' + releaseBranch + ' only)');
     callback();
   });
 };
@@ -127,13 +127,17 @@ utils.getCommitMessagesSinceLastRelease = function (callback) {
 
 utils.commit = function (callback) {
   var message = utils.commitMessageWithCIID() + ' [skip ci]';
-  utils.exec('git commit -m \'' + message + '\'', function (err) {
+  utils.exec('git commit -m \'' + message + '\'', function (err, stdout, stderr) {
+    console.log('committed, got', err, stdout, stderr); // debug while this is silently failing
     callback(err);
   });
 };
 
 utils.push = function (callback) {
-  utils.execAndIgnoreOutput('git config --global push.default matching; git push', callback);
+  utils.exec('git config --global push.default matching; git push', function (err, stdout, stderr) {
+    console.log('pushed, got', err, stdout, stderr); // debug while this is silently failing
+    callback(err);
+  });
 };
 
 // relies on something like # changelog being in the CHANGELOG already
@@ -150,7 +154,10 @@ utils.updateChangelog = function (notes, callback) {
 };
 
 utils.addFile = function (file, callback) {
-  utils.execAndIgnoreOutput('git add ' + file, callback);
+  utils.exec('git add ' + file, function (err, stdout, stderr) {
+    console.log('added', file, 'got', err, stdout, stderr); // debug while this is silently failing
+    callback(err);
+  });
 };
 
 utils.addDist = utils.addFile.bind(null, 'dist');

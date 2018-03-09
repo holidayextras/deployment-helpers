@@ -1,6 +1,6 @@
 'use strict';
 
-var GitHubApi = require('github');
+var GitHubApi = require('@octokit/rest');
 
 /*
 {

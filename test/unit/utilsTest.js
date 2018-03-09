@@ -973,25 +973,25 @@ describe('utils', function () {
 
   describe('addFile', function () {
     beforeEach(function () {
-      sandbox.stub(utils, 'execAndIgnoreOutput')
-      utils.addFile('foo', 'CALLBACK')
+      sandbox.stub(utils, 'exec').yields()
+      utils.addFile('foo', callback)
     })
 
     it('executes git cmd', function () {
-      expect(utils.execAndIgnoreOutput).to.have.been.calledOnce()
-        .and.calledWithExactly('git add foo', 'CALLBACK')
+      expect(utils.exec).to.have.been.calledOnce()
+        .and.calledWith('git add foo')
     })
   })
 
   describe('push', function () {
     beforeEach(function () {
-      sandbox.stub(utils, 'execAndIgnoreOutput')
-      utils.push('CALLBACK')
+      sandbox.stub(utils, 'exec').yields()
+      utils.push(callback)
     })
 
     it('executes git cmd', function () {
-      expect(utils.execAndIgnoreOutput).to.have.been.calledOnce()
-        .and.calledWithExactly('git config --global push.default matching; git push', 'CALLBACK')
+      expect(utils.exec).to.have.been.calledOnce()
+        .and.calledWith('git config --global push.default matching; git push')
     })
   })
 

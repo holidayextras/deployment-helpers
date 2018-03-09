@@ -130,13 +130,17 @@ utils.getCommitMessagesSinceLastRelease = callback => {
 
 utils.commit = callback => {
   const message = utils.commitMessageWithCIID() + ' [skip ci]'
-  utils.exec(`git commit -m '${message}'`, err => {
+  utils.exec(`git commit -m '${message}'`, (err, stdout, stderr) => {
+    console.log('committed, got', err, stdout, stderr) // debug while this is silently failing
     callback(err)
   })
 }
 
 utils.push = callback => {
-  utils.execAndIgnoreOutput(`git config --global push.default matching; git push`, callback)
+  utils.exec(`git config --global push.default matching; git push`, (err, stdout, stderr) => {
+    console.log('pushed, got', err, stdout, stderr) // debug while this is silently failing
+    callback(err)
+  })
 }
 
 // relies on something like # changelog being in the CHANGELOG already
@@ -156,7 +160,10 @@ utils.updateChangelog = (notes, callback) => {
 }
 
 utils.addFile = (file, callback) => {
-  utils.execAndIgnoreOutput(`git add ${file}`, callback)
+  utils.exec(`git add ${file}`, (err, stdout, stderr) => {
+    console.log('added', file, 'got', err, stdout, stderr) // debug while this is silently failing
+    callback(err)
+  })
 }
 
 utils.addDist = utils.addFile.bind(null, 'dist')
