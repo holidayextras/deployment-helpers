@@ -110,11 +110,12 @@ utils.checkBranch = (releaseBranch, callback) => {
 }
 
 utils.checkAlreadyReleased = callback => {
-  const cmd = `git tag --list | grep -E '^v[0-9]+.[0-9]+.[0-9]+$' | sort | tail -n 1`
+  const cmd = `git tag --list | grep -E '^${utils.versionTag}$'`
+  console.log('checkAlreadyReleased', cmd, 'looking for', utils.versionTag)
   utils.exec(cmd, (err, tag) => {
+    console.log('got', err, tag)
     if (err) return callback(err)
-    tag = ('' + tag).trim()
-    if (tag === utils.versionTag) return callback(`already released ${utils.version} - please ⬆️  your version`)
+    if (tag) return callback(`already released ${utils.version} - please ⬆️  your version`)
     callback()
   })
 }
@@ -201,8 +202,8 @@ utils.tagVersion = (tag, notes, callback) => {
     const releaseJSON = JSON.stringify(release).replace(/'/g, '')
     const cmd = `curl ${credentials} --data '${releaseJSON}' https://api.github.com/repos/${utils.ownerAndName}/releases`
     utils.exec(cmd, err => {
-      if (err) console.warn(err)
-      callback()
+      if (err) console.warn('error', err, 'with tagging', cmd)
+      callback(err)
     })
   })
 }

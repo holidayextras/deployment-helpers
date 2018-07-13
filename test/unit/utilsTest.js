@@ -388,7 +388,7 @@ describe('utils', function () {
 
     describe('when not already released', function () {
       beforeEach(function () {
-        utils.exec.yields(null, 'TAG\n')
+        utils.exec.yields()
         utils.checkAlreadyReleased(callback)
       })
 
@@ -446,14 +446,9 @@ describe('utils', function () {
         utils.tagVersion('TAG', 'NOTES', callback)
       })
 
-      it('warns us', function () {
-        expect(console.warn).to.have.been.calledOnce()
-          .and.calledWithExactly('oops')
-      })
-
-      it('just yields', function () {
+      it('yields the error', function () {
         expect(callback).to.have.been.calledOnce()
-          .and.calledWithExactly()
+          .and.calledWithExactly('oops')
       })
     })
 
@@ -466,7 +461,7 @@ describe('utils', function () {
 
       it('yields', function () {
         expect(callback).to.have.been.calledOnce()
-          .and.calledWithExactly()
+          .and.calledWithExactly(undefined)
       })
     })
 
@@ -479,7 +474,7 @@ describe('utils', function () {
 
       it('yields', function () {
         expect(callback).to.have.been.calledOnce()
-          .and.calledWithExactly()
+          .and.calledWithExactly(undefined)
       })
     })
 
@@ -492,7 +487,7 @@ describe('utils', function () {
 
       it('still yields', function () {
         expect(callback).to.have.been.calledOnce()
-          .and.calledWithExactly()
+          .and.calledWithExactly(undefined)
       })
     })
   })
