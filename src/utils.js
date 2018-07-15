@@ -8,6 +8,9 @@ utils.labelPullRequestWithMetricMovement = require('./labelPullRequestWithMetric
 
 const credentials = `-u "${process.env.GITHUB_USER}:${process.env.GITHUB_API_TOKEN}"`
 
+// remove the token from any debugging output
+const _redact = foo => ('' + foo).replace(process.env.GITHUB_API_TOKEN, '[REDACTED]')
+
 utils.version = process.env.npm_package_version
 utils.versionTag = 'v' + utils.version
 utils.majorVersionTag = utils.versionTag.replace(/\..+/, '-latest')
@@ -110,12 +113,11 @@ utils.checkBranch = (releaseBranch, callback) => {
 }
 
 utils.checkAlreadyReleased = callback => {
-  const cmd = `git tag --list | grep -E '^${utils.versionTag}$'`
-  console.log('checkAlreadyReleased', cmd, 'looking for', utils.versionTag)
-  utils.exec(cmd, (err, tag) => {
-    console.log('got', err, tag)
+  const cmd = `git tag --list`
+  utils.exec(cmd, (err, tags) => {
     if (err) return callback(err)
-    if (tag) return callback(`already released ${utils.version} - please ⬆️  your version`)
+    tags = ('' + tags).split(/\n/)
+    if (tags.includes(utils.versionTag)) return callback(`already released ${utils.version} - please ⬆️  your version`)
     callback()
   })
 }
@@ -202,7 +204,7 @@ utils.tagVersion = (tag, notes, callback) => {
     const releaseJSON = JSON.stringify(release).replace(/'/g, '')
     const cmd = `curl ${credentials} --data '${releaseJSON}' https://api.github.com/repos/${utils.ownerAndName}/releases`
     utils.exec(cmd, err => {
-      if (err) console.warn('error', err, 'with tagging', cmd)
+      if (err) console.warn('error', err, 'with tagging', _redact(cmd))
       callback(err)
     })
   })
@@ -215,7 +217,7 @@ utils.tagMinorVersion = utils.tagVersion.bind(utils, utils.minorVersionTag, '')
 utils.deleteTag = (tag, callback) => {
   const cmd = `curl ${credentials} -X DELETE https://api.github.com/repos/${utils.ownerAndName}/git/refs/tags/${tag}`
   utils.exec(cmd, err => {
-    if (err) console.warn(cmd, err)
+    if (err) console.warn(_redact(cmd), err)
     // may not exist so just call back
     callback()
   })
