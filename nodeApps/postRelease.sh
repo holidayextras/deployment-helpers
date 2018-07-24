@@ -7,9 +7,9 @@ NO_METRIC=$2
 
 if [ $ENVIRONMENT = "production" ] || [ $ENVIRONMENT = "master" ]; then
 	# Tag this deploy and make a release in github
-	curl --user "${GHUSER}:${GHPASS}" --data "{\"tag_name\": \"v${CANDIDATE_VERSION}\",\"target_commitish\": \"master\",\"name\": \"v${CANDIDATE_VERSION}\",\"body\": \"Production release by @${CIRCLE_USERNAME} (via build: [${CIRCLE_BUILD_NUM}](https://circleci.com/gh/${REPO_OWNER}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BUILD_NUM})).\",\"draft\": false,\"prerelease\": false}" https://api.github.com/repos/${REPO_OWNER}/${CIRCLE_PROJECT_REPONAME}/releases
-fi
-# Add a deployment counter in the metrics platform (graphite)
-if [ -z $NO_METRIC ]; then
-	echo "${GRAPHITE_API_KEY}.counters.${APP_NAME}.${ENVIRONMENT}.inf.deployment 1" | nc ${GRAPHITE_ENDPOINT_PREFIX}.carbon.hostedgraphite.com 2003
+	if [ $CI_PLATFORM = 'dockyard' ] ;  then
+		curl --user "${GHUSER}:${GHPASS}" --data  "{\"tag_name\": \"v${CANDIDATE_VERSION}\",\"target_commitish\": \"master\",\"name\": \"v${CANDIDATE_VERSION}\",\"body\": \"Production release by HXCi (via:[ci-service](https://ci.dock-yard.io/repo/${CI_REPO_NAME})).\",\"draft\": false,\"prerelease\": false}" https://api.github.com/repos/${REPO_OWNER}/${CI_REPO_NAME}/releases
+	else
+		curl --user "${GHUSER}:${GHPASS}" --data  "{\"tag_name\": \"v${CANDIDATE_VERSION}\",\"target_commitish\": \"master\",\"name\": \"v${CANDIDATE_VERSION}\",\"body\": \"Production release by @${CIRCLE_USERNAME} (via build: [${CIRCLE_BUILD_NUM}](https://circleci.com/gh/${REPO_OWNER}/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BUILD_NUM})).\",\"draft\": false,\"prerelease\": false}" https://api.github.com/repos/${REPO_OWNER}/${CIRCLE_PROJECT_REPONAME}/releases
+	fi
 fi
