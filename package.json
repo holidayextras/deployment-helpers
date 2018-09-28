@@ -69,16 +69,16 @@
   },
   "devDependencies": {
     "babel-cli": "6.26.0",
-    "babel-core": "6.26.0",
-    "babel-preset-env": "1.6.1",
-    "chai": "^3.5.0",
-    "dirty-chai": "^1.2.2",
+    "babel-core": "6.26.3",
+    "babel-preset-env": "1.7.0",
+    "chai": "3.5.0",
+    "dirty-chai": "1.2.2",
     "mocha": "4.1.0",
-    "mocha-junit-reporter": "1.15.0",
+    "mocha-junit-reporter": "1.18.0",
     "nyc": "10.3.2",
-    "sinon": "4.4.0",
+    "sinon": "4.5.0",
     "sinon-chai": "2.14.0",
-    "standard": "^9.0.1"
+    "standard": "9.0.2"
   },
   "directories": {
     "test": "test"
