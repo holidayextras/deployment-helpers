@@ -8,7 +8,10 @@ var utils = module.exports = {};
 
 utils.labelPullRequestWithMetricMovement = require('./labelPullRequestWithMetricMovement');
 
-var credentials = '-u "' + process.env.GITHUB_USER + ':' + process.env.GITHUB_API_TOKEN + '"';
+// remove the token from any debugging output
+var _redact = function _redact(foo) {
+  return ('' + foo).replace(process.env.GITHUB_API_TOKEN, '[REDACTED]');
+};
 
 utils.version = process.env.npm_package_version;
 utils.versionTag = 'v' + utils.version;
@@ -21,7 +24,7 @@ var repo = ('' + process.env.npm_package_repository_url).split('/');
 /* istanbul ignore else */
 if (repo.pop() === utils.name + '.git') {
   utils.ownerAndName = repo.pop() + '/' + utils.name;
-  console.info('got owner and name', utils.ownerAndName, 'from', process.env.npm_package_repository_url, 'get this from env vars?');
+  // console.info('got owner and name', utils.ownerAndName, 'from', process.env.npm_package_repository_url, 'get this from env vars?')
 }
 
 utils.getIntegrity = function (file, callback) {
@@ -33,6 +36,7 @@ utils.getIntegrity = function (file, callback) {
 
 utils.exec = function (cmd, callback) {
   childProcess.exec(cmd, function (err, stdout, stderr) {
+    if (err || stderr) console.warn(_redact(cmd), err, stdout, stderr);
     callback(err, stdout);
   });
 };
@@ -107,11 +111,11 @@ utils.checkBranch = function (releaseBranch, callback) {
 };
 
 utils.checkAlreadyReleased = function (callback) {
-  var cmd = 'git tag --list | grep -E \'^v[0-9]+.[0-9]+.[0-9]+$\' | sort | tail -n 1';
-  utils.exec(cmd, function (err, tag) {
+  var cmd = 'git tag --list';
+  utils.exec(cmd, function (err, tags) {
     if (err) return callback(err);
-    tag = ('' + tag).trim();
-    if (tag === utils.versionTag) return callback('already released ' + utils.version + ' - please \u2B06\uFE0F  your version');
+    tags = ('' + tags).split(/\n/);
+    if (tags.includes(utils.versionTag)) return callback('already released ' + utils.version + ' - please \u2B06\uFE0F  your version');
     callback();
   });
 };
@@ -128,14 +132,14 @@ utils.getCommitMessagesSinceLastRelease = function (callback) {
 utils.commit = function (callback) {
   var message = utils.commitMessageWithCIID() + ' [skip ci]';
   utils.exec('git commit -m \'' + message + '\'', function (err, stdout, stderr) {
-    console.log('committed, got', err, stdout, stderr); // debug while this is silently failing
+    // console.log('committed, got', err, stdout, stderr) // debug while this is silently failing
     callback(err);
   });
 };
 
 utils.push = function (callback) {
   utils.exec('git config --global push.default matching; git push', function (err, stdout, stderr) {
-    console.log('pushed, got', err, stdout, stderr); // debug while this is silently failing
+    // console.log('pushed, got', err, stdout, stderr) // debug while this is silently failing
     callback(err);
   });
 };
@@ -155,7 +159,7 @@ utils.updateChangelog = function (notes, callback) {
 
 utils.addFile = function (file, callback) {
   utils.exec('git add ' + file, function (err, stdout, stderr) {
-    console.log('added', file, 'got', err, stdout, stderr); // debug while this is silently failing
+    // console.log('added', file, 'got', err, stdout, stderr) // debug while this is silently failing
     callback(err);
   });
 };
@@ -181,22 +185,13 @@ utils.commitMessageWithCILinks = function () {
 
 utils.tagVersion = function (tag, notes, callback) {
   var message = utils.commitMessageWithCILinks();
+  console.log('tagVersion', tag);
   utils.exec('git rev-parse HEAD', function (err, sha) {
     if (err) return callback(err);
     var body = [message, notes].join('\n').replace(/"/g, '');
-    var release = {
-      tag_name: tag,
-      target_commitish: ('' + sha).trim(),
-      name: tag,
-      body: body,
-      draft: false,
-      prerelease: false
-    };
-    var releaseJSON = JSON.stringify(release).replace(/'/g, '');
-    var cmd = 'curl ' + credentials + ' --data \'' + releaseJSON + '\' https://api.github.com/repos/' + utils.ownerAndName + '/releases';
+    var cmd = 'git tag -a ' + tag + ' -m "' + body + '" ' + ('' + sha).trim() + '; git push origin ' + tag;
     utils.exec(cmd, function (err) {
-      if (err) console.warn(err);
-      callback();
+      callback(err);
     });
   });
 };
@@ -206,10 +201,10 @@ utils.tagMajorVersion = utils.tagVersion.bind(utils, utils.majorVersionTag, '');
 utils.tagMinorVersion = utils.tagVersion.bind(utils, utils.minorVersionTag, '');
 
 utils.deleteTag = function (tag, callback) {
-  var cmd = 'curl ' + credentials + ' -X DELETE https://api.github.com/repos/' + utils.ownerAndName + '/git/refs/tags/' + tag;
-  utils.exec(cmd, function (err) {
-    if (err) console.warn(cmd, err);
-    // may not exist so just call back
+  console.log('deleteTag', tag);
+  var cmd = 'git tag -d ' + tag + '; git push origin :refs/tags/' + tag;
+  utils.exec(cmd, function (ignoredErr) {
+    // may not exist so just call back - we are console.warning the error inside utils.exec()
     callback();
   });
 };
