@@ -6,8 +6,6 @@ const utils = module.exports = {}
 
 utils.labelPullRequestWithMetricMovement = require('./labelPullRequestWithMetricMovement')
 
-const credentials = `-u "${process.env.GITHUB_USER}:${process.env.GITHUB_API_TOKEN}"`
-
 // remove the token from any debugging output
 const _redact = foo => ('' + foo).replace(process.env.GITHUB_API_TOKEN, '[REDACTED]')
 
@@ -195,16 +193,7 @@ utils.tagVersion = (tag, notes, callback) => {
   utils.exec(`git rev-parse HEAD`, (err, sha) => {
     if (err) return callback(err)
     const body = [message, notes].join('\n').replace(/"/g, '')
-    const release = {
-      tag_name: tag,
-      target_commitish: ('' + sha).trim(),
-      name: tag,
-      body,
-      draft: false,
-      prerelease: false
-    }
-    const releaseJSON = JSON.stringify(release).replace(/'/g, '')
-    const cmd = `curl ${credentials} --request POST --header "Content-Type: application/json" --data '${releaseJSON}' https://api.github.com/repos/${utils.ownerAndName}/releases`
+    const cmd = `git tag -a ${tag} -m "${body}" ${('' + sha).trim()}; git push origin ${tag}`
     utils.exec(cmd, err => {
       callback(err)
     })
@@ -217,7 +206,7 @@ utils.tagMinorVersion = utils.tagVersion.bind(utils, utils.minorVersionTag, '')
 
 utils.deleteTag = (tag, callback) => {
   console.log('deleteTag', tag)
-  const cmd = `curl ${credentials} --request DELETE https://api.github.com/repos/${utils.ownerAndName}/git/refs/tags/${tag}`
+  const cmd = `git tag -d ${tag}; git push origin :refs/tags/${tag}`
   utils.exec(cmd, ignoredErr => {
     // may not exist so just call back - we are console.warning the error inside utils.exec()
     callback()
