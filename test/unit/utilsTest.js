@@ -504,12 +504,7 @@ describe('utils', function () {
         utils.deleteTag('foo', callback)
       })
 
-      it('warns us', function () {
-        expect(console.warn).to.have.been.calledOnce()
-          .and.calledWithExactly(sandbox.match.string, 'oops')
-      })
-
-      it('yields', function () {
+      it('just yields as we handle the warning elsewhere', function () {
         expect(callback).to.have.been.calledOnce()
           .and.calledWithExactly()
       })

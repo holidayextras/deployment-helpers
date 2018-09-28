@@ -34,6 +34,7 @@ utils.getIntegrity = (file, callback) => {
 
 utils.exec = (cmd, callback) => {
   childProcess.exec(cmd, (err, stdout, stderr) => {
+    if (err || stderr) console.warn(_redact(cmd), err, stdout, stderr)
     callback(err, stdout)
   })
 }
@@ -205,7 +206,6 @@ utils.tagVersion = (tag, notes, callback) => {
     const releaseJSON = JSON.stringify(release).replace(/'/g, '')
     const cmd = `curl ${credentials} --data '${releaseJSON}' https://api.github.com/repos/${utils.ownerAndName}/releases`
     utils.exec(cmd, err => {
-      if (err) console.warn('error', err, 'with tagging', _redact(cmd))
       callback(err)
     })
   })
@@ -218,9 +218,8 @@ utils.tagMinorVersion = utils.tagVersion.bind(utils, utils.minorVersionTag, '')
 utils.deleteTag = (tag, callback) => {
   console.log('deleteTag', tag)
   const cmd = `curl ${credentials} -X DELETE https://api.github.com/repos/${utils.ownerAndName}/git/refs/tags/${tag}`
-  utils.exec(cmd, err => {
-    if (err) console.warn(_redact(cmd), err)
-    // may not exist so just call back
+  utils.exec(cmd, ignoredErr => {
+    // may not exist so just call back - we are console.warning the error inside utils.exec()
     callback()
   })
 }
