@@ -6,9 +6,6 @@ const utils = module.exports = {}
 
 utils.labelPullRequestWithMetricMovement = require('./labelPullRequestWithMetricMovement')
 
-// remove the token from any debugging output
-const _redact = foo => ('' + foo).replace(process.env.GITHUB_API_TOKEN, '[REDACTED]')
-
 utils.version = process.env.npm_package_version
 utils.versionTag = 'v' + utils.version
 utils.majorVersionTag = utils.versionTag.replace(/\..+/, '-latest')
@@ -32,7 +29,7 @@ utils.getIntegrity = (file, callback) => {
 
 utils.exec = (cmd, callback) => {
   childProcess.exec(cmd, (err, stdout, stderr) => {
-    if (err || stderr) console.warn(_redact(cmd), err, stdout, stderr)
+    if (err || stderr) console.warn(cmd, err, stdout, stderr)
     callback(err, stdout)
   })
 }
