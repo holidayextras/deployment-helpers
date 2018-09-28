@@ -1,6 +1,26 @@
 # Changelog 
 
-- v1.9.1
+- v1.9.4
+  - bd67a3e :arrow_up: version bump
+  - ef72912 :hammer: remove debugging
+  - b330722 :hammer: stop using git api; just cli
+  - fc3f1c7 :wrench: add tag must be a POST
+  - 8a5cec1 :female_detective: more debug
+  - 770f886 :hammer: add deploy script
+  - 6722712 :arrow_up: version bump dependencies
+  - 252011a :truck: move to staging branch
+  - 63dcff8 :thinking: debug
+  - edfb374 Merge pull request #47 from holidayextras/NB-1086
+  - 67adfd3 update to work on dockyard ci
+  - df331a3 remove redundant code
+  - 3508b06 update to work on dockyard ci
+  - 2f7fe4c update to work on dockyard ci
+  - 738b009 Merge pull request #46 from holidayextras/match-unsorted-versions
+  - cde1e85 :wrench: fix reading previous tags
+  - 6190b0f Merge pull request #45 from holidayextras/match-unsorted-versions
+  - 8d67c3e :arrow_up: bump mocha, fix security issue
+  - ab9da99 :wrench: match unsorted versions
+  - 9bab03b :airplane: Release via CI build  [skip ci]
   - 62a86c9 Merge pull request #43 from holidayextras/ci-debug
   - fbf12f9 :thinking: debug
   - 41847f8 Merge pull request #42 from holidayextras/travis
@@ -16,6 +36,21 @@
   - 749ba73 :wrench: remove markup from commit message
   - 4560df3 :construction: commit dist + update CHANGELOG
  
+- v1.9.1
+  - 62a86c9 Merge pull request #43 from holidayextras/ci-debug
+  - fbf12f9 :thinking: debug
+  - 41847f8 Merge pull request #42 from holidayextras/travis
+  - 0eea0f5 :mouse: small wording change
+  - 9f82180 :book: documentation changes
+  - a627b43 :arrow_up: update dependencies, clear some warnings
+  - cc1b8d1 :truck: circle -> travis
+  - 34846ff :airplane: Release via CI build  [skip ci]
+  - 2351cfb Merge pull request #41 from holidayextras/update-pr
+  - fe276b6 :mouse: pr comments
+  - 7d57262 :wrench: fix test + comment
+  - e6babf4 :mouse: added comment
+  - 749ba73 :wrench: remove markup from commit message
+  - 4560df3 :construction: commit dist + update CHANGELOG
 - v1.9.0
   - 2351cfb Merge pull request #41 from holidayextras/update-pr
   - fe276b6 :mouse: pr comments
