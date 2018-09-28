@@ -248,7 +248,7 @@ describe('utils', function () {
       })
 
       it('returns a string', function () {
-        expect(utils.commitMessageWithCIID()).to.equal(':airplane: Release via CI build CIRCLE')
+        expect(utils.commitMessageWithCIID()).to.match(/^:\w+: Release via CI build CIRCLE/)
       })
     })
 
@@ -258,13 +258,13 @@ describe('utils', function () {
       })
 
       it('returns a string', function () {
-        expect(utils.commitMessageWithCIID()).to.equal(':airplane: Release via CI build TRAVIS')
+        expect(utils.commitMessageWithCIID()).to.match(/^:\w+: Release via CI build TRAVIS/)
       })
     })
 
     describe('on neither', function () {
       it('returns a string', function () {
-        expect(utils.commitMessageWithCIID()).to.equal(':airplane: Release via CI build ')
+        expect(utils.commitMessageWithCIID()).to.match(/^:\w+: Release via CI build/)
       })
     })
   })

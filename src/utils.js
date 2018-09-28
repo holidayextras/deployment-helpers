@@ -133,14 +133,12 @@ utils.getCommitMessagesSinceLastRelease = callback => {
 utils.commit = callback => {
   const message = utils.commitMessageWithCIID() + ' [skip ci]'
   utils.exec(`git commit -m '${message}'`, (err, stdout, stderr) => {
-    // console.log('committed, got', err, stdout, stderr) // debug while this is silently failing
     callback(err)
   })
 }
 
 utils.push = callback => {
   utils.exec(`git config --global push.default matching; git push`, (err, stdout, stderr) => {
-    // console.log('pushed, got', err, stdout, stderr) // debug while this is silently failing
     callback(err)
   })
 }
@@ -162,10 +160,7 @@ utils.updateChangelog = (notes, callback) => {
 }
 
 utils.addFile = (file, callback) => {
-  utils.exec(`git add ${file}`, (err, stdout, stderr) => {
-    // console.log('added', file, 'got', err, stdout, stderr) // debug while this is silently failing
-    callback(err)
-  })
+  utils.execAndIgnoreOutput(`git add ${file}`, callback)
 }
 
 utils.addDist = utils.addFile.bind(null, 'dist')
@@ -173,7 +168,7 @@ utils.addDist = utils.addFile.bind(null, 'dist')
 utils.addChangelog = utils.addFile.bind(null, 'CHANGELOG.md')
 
 utils.commitMessageWithCIID = () => {
-  return `:airplane: Release via CI build ${process.env.CIRCLE_BUILD_NUM || process.env.TRAVIS_JOB_ID || ''}`
+  return `:robot: Release via CI build ${process.env.CIRCLE_BUILD_NUM || process.env.TRAVIS_JOB_ID || ''}`
 }
 
 utils.commitMessageWithCILinks = () => {
@@ -189,14 +184,11 @@ utils.commitMessageWithCILinks = () => {
 
 utils.tagVersion = (tag, notes, callback) => {
   const message = utils.commitMessageWithCILinks()
-  console.log('tagVersion', tag)
   utils.exec(`git rev-parse HEAD`, (err, sha) => {
     if (err) return callback(err)
     const body = [message, notes].join('\n').replace(/"/g, '')
     const cmd = `git tag -a ${tag} -m "${body}" ${('' + sha).trim()}; git push origin ${tag}`
-    utils.exec(cmd, err => {
-      callback(err)
-    })
+    utils.execAndIgnoreOutput(cmd, callback)
   })
 }
 
@@ -205,7 +197,6 @@ utils.tagMajorVersion = utils.tagVersion.bind(utils, utils.majorVersionTag, '')
 utils.tagMinorVersion = utils.tagVersion.bind(utils, utils.minorVersionTag, '')
 
 utils.deleteTag = (tag, callback) => {
-  console.log('deleteTag', tag)
   const cmd = `git tag -d ${tag}; git push origin :refs/tags/${tag}`
   utils.exec(cmd, ignoredErr => {
     // may not exist so just call back - we are console.warning the error inside utils.exec()
