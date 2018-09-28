@@ -204,7 +204,7 @@ utils.tagVersion = (tag, notes, callback) => {
       prerelease: false
     }
     const releaseJSON = JSON.stringify(release).replace(/'/g, '')
-    const cmd = `curl ${credentials} --data '${releaseJSON}' https://api.github.com/repos/${utils.ownerAndName}/releases`
+    const cmd = `curl ${credentials} --request POST --header "Content-Type: application/json" --data '${releaseJSON}' https://api.github.com/repos/${utils.ownerAndName}/releases`
     utils.exec(cmd, err => {
       callback(err)
     })
@@ -217,7 +217,7 @@ utils.tagMinorVersion = utils.tagVersion.bind(utils, utils.minorVersionTag, '')
 
 utils.deleteTag = (tag, callback) => {
   console.log('deleteTag', tag)
-  const cmd = `curl ${credentials} -X DELETE https://api.github.com/repos/${utils.ownerAndName}/git/refs/tags/${tag}`
+  const cmd = `curl ${credentials} --request DELETE https://api.github.com/repos/${utils.ownerAndName}/git/refs/tags/${tag}`
   utils.exec(cmd, ignoredErr => {
     // may not exist so just call back - we are console.warning the error inside utils.exec()
     callback()
