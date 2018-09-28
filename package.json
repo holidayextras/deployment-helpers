@@ -21,8 +21,8 @@
     "prerelease": "nodeApps/preRelease.js",
     "release": "nodeApps/release.js",
     "lint": "standard",
-    "circleci": "npm run lint && MOCHA_FILE=$CIRCLE_TEST_REPORTS/junit/test-results.xml nyc mocha --reporter mocha-junit-reporter && nyc check-coverage",
-    "ci": "NODE_ENV=production npm run build"
+    "ci": "NODE_ENV=production npm run build",
+    "deploy": "RELEASE_BRANCH=staging npm run release"
   },
   "babel": {
     "presets": [
@@ -74,7 +74,6 @@
     "chai": "3.5.0",
     "dirty-chai": "1.2.2",
     "mocha": "4.1.0",
-    "mocha-junit-reporter": "1.18.0",
     "nyc": "10.3.2",
     "sinon": "4.5.0",
     "sinon-chai": "2.14.0",
