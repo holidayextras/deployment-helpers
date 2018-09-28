@@ -22,7 +22,7 @@ const repo = ('' + process.env.npm_package_repository_url).split('/')
 /* istanbul ignore else */
 if (repo.pop() === `${utils.name}.git`) {
   utils.ownerAndName = `${repo.pop()}/${utils.name}`
-  console.info('got owner and name', utils.ownerAndName, 'from', process.env.npm_package_repository_url, 'get this from env vars?')
+  // console.info('got owner and name', utils.ownerAndName, 'from', process.env.npm_package_repository_url, 'get this from env vars?')
 }
 
 utils.getIntegrity = (file, callback) => {
@@ -134,14 +134,14 @@ utils.getCommitMessagesSinceLastRelease = callback => {
 utils.commit = callback => {
   const message = utils.commitMessageWithCIID() + ' [skip ci]'
   utils.exec(`git commit -m '${message}'`, (err, stdout, stderr) => {
-    console.log('committed, got', err, stdout, stderr) // debug while this is silently failing
+    // console.log('committed, got', err, stdout, stderr) // debug while this is silently failing
     callback(err)
   })
 }
 
 utils.push = callback => {
   utils.exec(`git config --global push.default matching; git push`, (err, stdout, stderr) => {
-    console.log('pushed, got', err, stdout, stderr) // debug while this is silently failing
+    // console.log('pushed, got', err, stdout, stderr) // debug while this is silently failing
     callback(err)
   })
 }
@@ -164,7 +164,7 @@ utils.updateChangelog = (notes, callback) => {
 
 utils.addFile = (file, callback) => {
   utils.exec(`git add ${file}`, (err, stdout, stderr) => {
-    console.log('added', file, 'got', err, stdout, stderr) // debug while this is silently failing
+    // console.log('added', file, 'got', err, stdout, stderr) // debug while this is silently failing
     callback(err)
   })
 }
@@ -190,6 +190,7 @@ utils.commitMessageWithCILinks = () => {
 
 utils.tagVersion = (tag, notes, callback) => {
   const message = utils.commitMessageWithCILinks()
+  console.log('tagVersion', tag)
   utils.exec(`git rev-parse HEAD`, (err, sha) => {
     if (err) return callback(err)
     const body = [message, notes].join('\n').replace(/"/g, '')
@@ -215,6 +216,7 @@ utils.tagMajorVersion = utils.tagVersion.bind(utils, utils.majorVersionTag, '')
 utils.tagMinorVersion = utils.tagVersion.bind(utils, utils.minorVersionTag, '')
 
 utils.deleteTag = (tag, callback) => {
+  console.log('deleteTag', tag)
   const cmd = `curl ${credentials} -X DELETE https://api.github.com/repos/${utils.ownerAndName}/git/refs/tags/${tag}`
   utils.exec(cmd, err => {
     if (err) console.warn(_redact(cmd), err)
