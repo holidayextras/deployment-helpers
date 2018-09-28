@@ -1,7 +1,10 @@
 {
   "name": "deployment-helpers",
-  "version": "1.9.3",
+  "version": "1.9.2",
   "description": "A collection of scripts that can be used as part of a deployment process.",
+  "platform": "custom",
+  "owner": "tech-foundation",
+  "ci": "dockyard",
   "main": "dist/module/utils",
   "bin": {
     "check-built-asset-size": "./nodeApps/checkBuiltAssetSize.js",
@@ -14,12 +17,12 @@
     "build": "babel src --out-dir dist/module",
     "coverage": "nyc mocha && nyc check-coverage",
     "checksize": "BUILT_ASSET=dist/module/utils.js ./nodeApps/checkBuiltAssetSize.js",
-    "test": "npm run coverage",
+    "test": "npm run lint && npm run coverage",
     "prerelease": "nodeApps/preRelease.js",
     "release": "nodeApps/release.js",
     "lint": "standard",
     "circleci": "npm run lint && MOCHA_FILE=$CIRCLE_TEST_REPORTS/junit/test-results.xml nyc mocha --reporter mocha-junit-reporter && nyc check-coverage",
-    "ci": "npm run lint && npm run coverage"
+    "ci": "NODE_ENV=production npm run build"
   },
   "babel": {
     "presets": [
@@ -59,11 +62,10 @@
       "/dist"
     ]
   },
-  "owner": "payment-platform",
   "license": "UNLICENSED",
   "dependencies": {
     "@octokit/rest": "14.0.9",
-    "async": "^2.3.0"
+    "async": "2.6.1"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",
