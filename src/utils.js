@@ -164,6 +164,8 @@ utils.addDist = utils.addFile.bind(null, 'dist')
 
 utils.addChangelog = utils.addFile.bind(null, 'CHANGELOG.md')
 
+utils.addSize = utils.addFile.bind(null, '.assetSize')
+
 utils.commitMessageWithCIID = () => {
   return `:robot: Release via CI build ${process.env.CIRCLE_BUILD_NUM || process.env.TRAVIS_JOB_ID || ''}`
 }
@@ -260,7 +262,21 @@ utils.reportSize = (current, previous, callback) => {
 
 utils.build = callback => {
   if (!process.env.npm_package_scripts_build) return callback()
-  utils.execAndIgnoreOutput('NODE_ENV=production npm run build', callback)
+  const file = process.env.BUILT_ASSET || `${utils.distFolder}/${utils.name}.min.js`
+  utils.execAndIgnoreOutput('NODE_ENV=production npm run build', err => {
+    if (err) return callback(err)
+    utils.getSize(file, (err, size) => {
+      if (err) return callback(err)
+      fs.writeFile('.assetSize', size, err => {
+        if (err) return callback(err)
+        utils.addFile('.assetSize', callback)
+      })
+    })
+  })
+}
+
+utils.getPreviousSize = callback => {
+  fs.readFile('.assetSize', 'utf-8', callback)
 }
 
 utils.getBuiltSizeOfBranch = (branch, callback) => {
@@ -275,11 +291,8 @@ utils.getBuiltSizeOfBranch = (branch, callback) => {
 utils.getBuiltAssetStats = callback => {
   utils.getBranch((err, branch) => {
     if (err) return callback(err)
-    utils.getBuiltSizeOfBranch('master', (err, previousSize) => {
-      if (err) {
-        console.error('We cannot get the size of master; did we do a shallow clone?')
-        return callback(err)
-      }
+    utils.getPreviousSize((err, previousSize) => {
+      if (err) return callback()
       utils.getBuiltSizeOfBranch(branch, (err, size) => {
         if (err) return callback(err)
         utils.reportSize(size, previousSize, callback)
