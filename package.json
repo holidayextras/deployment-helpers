@@ -1,6 +1,6 @@
 {
   "name": "deployment-helpers",
-  "version": "1.9.4",
+  "version": "1.9.5",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "platform": "custom",
   "owner": "tech-foundation",
@@ -74,7 +74,7 @@
     "chai": "3.5.0",
     "dirty-chai": "1.2.2",
     "mocha": "4.1.0",
-    "nyc": "10.3.2",
+    "nyc": "13.1.0",
     "sinon": "4.5.0",
     "sinon-chai": "2.14.0",
     "standard": "9.0.2"

@@ -715,6 +715,9 @@ describe('utils', function () {
   describe('build', function () {
     beforeEach(function () {
       sandbox.stub(utils, 'execAndIgnoreOutput').yields()
+      sandbox.stub(utils, 'getSize').yields()
+      sandbox.stub(fs, 'writeFile').yields()
+      sandbox.stub(utils, 'addFile').yields()
     })
 
     describe('when there is no build script', function () {
@@ -726,6 +729,54 @@ describe('utils', function () {
       it('yields', function () {
         expect(callback).to.have.been.calledOnce()
           .and.calledWithExactly()
+      })
+    })
+
+    describe('when build fails', function () {
+      beforeEach(function () {
+        utils.execAndIgnoreOutput.yields('oops')
+        utils.build(callback)
+      })
+
+      it('yields the error', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly('oops')
+      })
+    })
+
+    describe('when get size fails', function () {
+      beforeEach(function () {
+        utils.getSize.yields('oops')
+        utils.build(callback)
+      })
+
+      it('yields the error', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly('oops')
+      })
+    })
+
+    describe('when write file fails', function () {
+      beforeEach(function () {
+        fs.writeFile.yields('oops')
+        utils.build(callback)
+      })
+
+      it('yields the error', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly('oops')
+      })
+    })
+
+    describe('when add file fails', function () {
+      beforeEach(function () {
+        utils.addFile.yields('oops')
+        utils.build(callback)
+      })
+
+      it('yields the error', function () {
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly('oops')
       })
     })
 
@@ -783,6 +834,7 @@ describe('utils', function () {
       sandbox.stub(utils, 'getBranch').yields(null, 'foo')
       sandbox.stub(utils, 'getBuiltSizeOfBranch').yields()
       sandbox.stub(utils, 'reportSize').yields()
+      sandbox.stub(utils, 'getPreviousSize').yields(null, 777)
     })
 
     describe('when on the wrong branch', function () {
@@ -807,21 +859,21 @@ describe('utils', function () {
 
     describe('when getting size of master branch errors', function () {
       beforeEach(function () {
-        utils.getBuiltSizeOfBranch.withArgs('master').yields('oops')
+        utils.getPreviousSize.yields('oops')
         utils.getBuiltAssetStats(callback)
       })
 
       it('does not get size of other branch', function () {
-        expect(utils.getBuiltSizeOfBranch).to.have.been.calledOnce()
+        expect(utils.getBuiltSizeOfBranch).not.to.have.been.called()
       })
 
       it('does not report size', function () {
         expect(utils.reportSize).not.to.have.been.called()
       })
 
-      it('yields an error', function () {
+      it('yields no error, probaby no previous size', function () {
         expect(callback).to.have.been.calledOnce()
-          .and.calledWithExactly('oops')
+          .and.calledWithExactly()
       })
     })
 
@@ -844,7 +896,6 @@ describe('utils', function () {
     describe('when all is ok', function () {
       beforeEach(function () {
         utils.getBuiltSizeOfBranch.withArgs('foo').yields(null, 666)
-        utils.getBuiltSizeOfBranch.withArgs('master').yields(null, 777)
         utils.getBuiltAssetStats(callback)
       })
 
