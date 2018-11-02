@@ -1,6 +1,6 @@
 {
   "name": "deployment-helpers",
-  "version": "1.9.4",
+  "version": "1.9.5",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "platform": "custom",
   "owner": "tech-foundation",
