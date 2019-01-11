@@ -22,7 +22,7 @@
     "release": "nodeApps/release.js",
     "lint": "standard",
     "ci": "NODE_ENV=production npm run build",
-    "deploy": "RELEASE_BRANCH=staging npm run release"
+    "deploy": "BUILT_ASSET=dist/module/utils.js RELEASE_BRANCH=staging npm run release"
   },
   "babel": {
     "presets": [
