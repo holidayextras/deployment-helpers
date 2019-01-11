@@ -160,7 +160,7 @@ utils.addFile = (file, callback) => {
   utils.execAndIgnoreOutput(`git add ${file}`, callback)
 }
 
-utils.addDist = utils.addFile.bind(null, 'dist')
+utils.addDist = utils.addFile.bind(null, process.env.DIST_FOLDER)
 
 utils.addChangelog = utils.addFile.bind(null, 'CHANGELOG.md')
 
@@ -220,7 +220,7 @@ utils.confirmOnFeatureBranch = callback => {
 utils.getSize = (file, callback) => {
   fs.stat(file, (err, result) => {
     if (err || !result) {
-      console.warn('could not stat', file, 'did you not `npm run build`?')
+      console.warn('could not stat', file, 'did you not `npm run build`? or did you mean to set BUILT_ASSET?')
       return callback(err)
     }
     callback(null, result.size)
