@@ -135,13 +135,13 @@ utils.push = callback => {
 
 // relies on something like # changelog being in the CHANGELOG already
 utils.updateChangelog = (notes, callback) => {
-  fs.readFile('CHANGELOG.md', 'utf-8', (readErr, contents) => {
-    if (readErr) return callback(readErr)
+  fs.readFile('CHANGELOG.md', 'utf-8', (ignoredError, contents = '') => {
     const existingLines = new RegExp(`.*${utils.versionTag}.*`, 'g')
     const newContents = contents
       .replace(existingLines, '')
       .replace(/\n\s*\n/g, '\n')
-      .replace(/# Changelog/gi, `# Changelog \n\n- ${utils.versionTag}${notes}`)
+      .replace(/# Changelog/gi, '')
+      .replace(/^/, `# Changelog\n\n- ${utils.versionTag}${notes}`)
     fs.writeFile('CHANGELOG.md', newContents, function (writeErr) {
       if (writeErr) return callback(writeErr)
       callback()
@@ -153,7 +153,7 @@ utils.addFile = (file, callback) => {
   utils.execAndIgnoreOutput(`git add ${file}`, callback)
 }
 
-utils.addDist = utils.addFile.bind(null, process.env.DIST_FOLDER)
+utils.addDist = utils.addFile.bind(null, utils.distFile)
 
 utils.addChangelog = utils.addFile.bind(null, 'CHANGELOG.md')
 

@@ -1027,9 +1027,10 @@ describe('utils', function () {
           .and.calledWith('CHANGELOG.md')
       })
 
-      it('yields the error', function () {
-        expect(callback).to.have.been.calledOnce()
-          .and.calledWithExactly('oops')
+      it('tries to write the file anyway', function () {
+        const multilineRegex = sandbox.match(/Changelog[\s\S]+NOTES/)
+        expect(fs.writeFile).to.have.been.calledOnce()
+          .and.calledWith('CHANGELOG.md', multilineRegex)
       })
     })
 
