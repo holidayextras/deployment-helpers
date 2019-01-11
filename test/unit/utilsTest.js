@@ -1,5 +1,4 @@
 const utils = require('../../src/utils')
-const async = require('async')
 const fs = require('fs')
 const childProcess = require('child_process')
 
@@ -84,36 +83,6 @@ describe('utils', function () {
 
       it('does not copy the file', function () {
         expect(utils.exec).not.to.have.been.called()
-      })
-
-      it('yields an error', function () {
-        expect(callback).to.have.been.calledOnce()
-          .and.calledWithExactly(sandbox.match.string)
-      })
-    })
-  })
-
-  describe('checkPrerequisites', function () {
-    beforeEach(function () {
-      sandbox.stub(async, 'waterfall').yields()
-    })
-
-    describe('when we have a name', function () {
-      beforeEach(function () {
-        utils.name = 'foo'
-        utils.checkPrerequisites(callback)
-      })
-
-      it('yields', function () {
-        expect(callback).to.have.been.calledOnce()
-          .and.calledWithExactly()
-      })
-    })
-
-    describe('when we do not have a name', function () {
-      beforeEach(function () {
-        utils.name = null
-        utils.checkPrerequisites(callback)
       })
 
       it('yields an error', function () {
@@ -718,6 +687,7 @@ describe('utils', function () {
       sandbox.stub(utils, 'getSize').yields()
       sandbox.stub(fs, 'writeFile').yields()
       sandbox.stub(utils, 'addFile').yields()
+      process.env.npm_package_scripts_build = 'BUILD'
     })
 
     describe('when there is no build script', function () {
@@ -782,7 +752,6 @@ describe('utils', function () {
 
     describe('when all is ok', function () {
       beforeEach(function () {
-        process.env.npm_package_scripts_build = 'BUILD'
         utils.build(callback)
       })
 
@@ -946,6 +915,11 @@ describe('utils', function () {
   })
 
   describe('getSize', function () {
+    beforeEach(function () {
+      sandbox.stub(console, 'info')
+      sandbox.stub(console, 'warn')
+    })
+
     it('does not throw', function () {
       expect(function () {
         utils.getSize('FILE', callback)
@@ -1120,13 +1094,25 @@ describe('utils', function () {
 
   describe('getBuiltAssetStats', function () {
     beforeEach(function () {
-      sandbox.stub(utils, 'getSize').yields(null, 666)
+      sandbox.stub(utils, 'exec').yields()
+      sandbox.stub(utils, 'getPreviousSize').yields(null, 666)
+      sandbox.stub(utils, 'getBuiltSizeOfBranch').yields(null, 667)
+      sandbox.stub(utils, 'getSize').yields(null, 668)
       sandbox.stub(utils, 'getBranch').yields(null, 'foo')
+      sandbox.stub(utils, 'reportSize').yields()
     })
 
     it('does not throw', function () {
       expect(function () {
         utils.getBuiltAssetStats(callback)
+      }).not.to.throw()
+    })
+  })
+
+  describe('getPreviousSize', function () {
+    it('does not throw', function () {
+      expect(function () {
+        utils.getPreviousSize(callback)
       }).not.to.throw()
     })
   })

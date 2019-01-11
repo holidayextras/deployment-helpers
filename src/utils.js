@@ -1,4 +1,3 @@
-const async = require('async')
 const childProcess = require('child_process')
 const fs = require('fs')
 
@@ -55,13 +54,7 @@ utils.getSignature = (file, callback) => {
 }
 
 utils.checkPrerequisites = callback => {
-  if (!utils.name) return callback('ERROR: run this as an npm script')
-  async.waterfall([
-    utils.getEmail,
-    utils.setEmail,
-    utils.getUser,
-    utils.setUser
-  ], callback)
+  return callback()
 }
 
 utils.getEmail = callback => {
