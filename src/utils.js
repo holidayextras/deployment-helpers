@@ -150,10 +150,11 @@ utils.updateChangelog = (notes, callback) => {
 }
 
 utils.addFile = (file, callback) => {
+  if (!file) return callback(new Error('addFile expects a file'))
   utils.execAndIgnoreOutput(`git add ${file}`, callback)
 }
 
-utils.addDist = utils.addFile.bind(null, utils.distFile)
+utils.addDist = utils.addFile.bind(null, utils.distFolder)
 
 utils.addChangelog = utils.addFile.bind(null, 'CHANGELOG.md')
 

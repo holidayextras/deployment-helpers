@@ -989,12 +989,34 @@ describe('utils', function () {
   describe('addFile', function () {
     beforeEach(function () {
       sandbox.stub(utils, 'exec').yields()
-      utils.addFile('foo', callback)
     })
 
-    it('executes git cmd', function () {
-      expect(utils.exec).to.have.been.calledOnce()
-        .and.calledWith('git add foo')
+    describe('without a file', function () {
+      beforeEach(function () {
+        utils.addFile(null, callback)
+      })
+
+      it('does not execute git cmd', function () {
+        expect(utils.exec).not.to.have.been.called()
+      })
+
+      it('yields an error', function () {
+        const expected = sandbox.match.instanceOf(Error)
+          .and(sandbox.match.has('message', 'addFile expects a file'))
+        expect(callback).to.have.been.calledOnce()
+          .and.calledWithExactly(expected)
+      })
+    })
+
+    describe('with a file', function () {
+      beforeEach(function () {
+        utils.addFile('foo', callback)
+      })
+
+      it('executes git cmd', function () {
+        expect(utils.exec).to.have.been.calledOnce()
+          .and.calledWith('git add foo')
+      })
     })
   })
 
