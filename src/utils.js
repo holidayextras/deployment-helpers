@@ -54,7 +54,7 @@ utils.getSignature = (file, callback) => {
 }
 
 utils.checkPrerequisites = callback => {
-  return callback()
+  utils.setEmail(null, callback)
 }
 
 utils.getEmail = callback => {
