@@ -1015,7 +1015,7 @@ describe('utils', function () {
 
       it('executes git cmd', function () {
         expect(utils.exec).to.have.been.calledOnce()
-          .and.calledWith('git add foo')
+          .and.calledWith('git add --force foo')
       })
     })
   })

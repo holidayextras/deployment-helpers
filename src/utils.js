@@ -66,6 +66,7 @@ utils.getEmail = callback => {
 
 utils.setEmail = (email, callback) => {
   if (email) return callback()
+  /* istanbul ignore next */
   if (!process.env.GITHUB_EMAIL) {
     console.info('Our CI expects GITHUB_EMAIL to be set but this may be ok, carrying on...')
     return callback()
