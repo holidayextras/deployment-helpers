@@ -27,7 +27,6 @@ utils.getIntegrity = (file, callback) => {
 }
 
 utils.exec = (cmd, callback) => {
-  console.debug('DEBUG', cmd)
   childProcess.exec(cmd, (err, stdout, stderr) => {
     if (err || stderr) console.warn(cmd, err, stdout, stderr)
     callback(err, stdout)
