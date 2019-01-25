@@ -1,4 +1,3 @@
-const async = require('async')
 const childProcess = require('child_process')
 const fs = require('fs')
 
@@ -28,6 +27,7 @@ utils.getIntegrity = (file, callback) => {
 }
 
 utils.exec = (cmd, callback) => {
+  console.debug('DEBUG', cmd)
   childProcess.exec(cmd, (err, stdout, stderr) => {
     if (err || stderr) console.warn(cmd, err, stdout, stderr)
     callback(err, stdout)
@@ -55,13 +55,7 @@ utils.getSignature = (file, callback) => {
 }
 
 utils.checkPrerequisites = callback => {
-  if (!utils.name) return callback('ERROR: run this as an npm script')
-  async.waterfall([
-    utils.getEmail,
-    utils.setEmail,
-    utils.getUser,
-    utils.setUser
-  ], callback)
+  utils.setEmail(null, callback)
 }
 
 utils.getEmail = callback => {
@@ -73,6 +67,11 @@ utils.getEmail = callback => {
 
 utils.setEmail = (email, callback) => {
   if (email) return callback()
+  /* istanbul ignore next */
+  if (!process.env.GITHUB_EMAIL) {
+    console.info('Our CI expects GITHUB_EMAIL to be set but this may be ok, carrying on...')
+    return callback()
+  }
   const cmd = `git config user.email ${process.env.GITHUB_EMAIL}`
   utils.exec(cmd, () => {
     callback()
@@ -142,13 +141,13 @@ utils.push = callback => {
 
 // relies on something like # changelog being in the CHANGELOG already
 utils.updateChangelog = (notes, callback) => {
-  fs.readFile('CHANGELOG.md', 'utf-8', (readErr, contents) => {
-    if (readErr) return callback(readErr)
+  fs.readFile('CHANGELOG.md', 'utf-8', (ignoredError, contents = '') => {
     const existingLines = new RegExp(`.*${utils.versionTag}.*`, 'g')
     const newContents = contents
       .replace(existingLines, '')
       .replace(/\n\s*\n/g, '\n')
-      .replace(/# Changelog/gi, `# Changelog \n\n- ${utils.versionTag}${notes}`)
+      .replace(/# Changelog/gi, '')
+      .replace(/^/, `# Changelog\n\n- ${utils.versionTag}${notes}`)
     fs.writeFile('CHANGELOG.md', newContents, function (writeErr) {
       if (writeErr) return callback(writeErr)
       callback()
@@ -156,15 +155,19 @@ utils.updateChangelog = (notes, callback) => {
   })
 }
 
-utils.addFile = (file, callback) => {
-  utils.execAndIgnoreOutput(`git add ${file}`, callback)
+utils.addFile = file => {
+  return callback => {
+    if (!file) return callback(new Error('addFile expects a file'))
+    // --force in case the file we are expecting is gitignored
+    utils.execAndIgnoreOutput(`git add --force ${file}`, callback)
+  }
 }
 
-utils.addDist = utils.addFile.bind(null, 'dist')
+utils.addDist = utils.addFile(utils.distFolder)
 
-utils.addChangelog = utils.addFile.bind(null, 'CHANGELOG.md')
+utils.addChangelog = utils.addFile('CHANGELOG.md')
 
-utils.addSize = utils.addFile.bind(null, '.assetSize')
+utils.addSize = utils.addFile('.assetSize')
 
 utils.commitMessageWithCIID = () => {
   return `:robot: Release via CI build ${process.env.CIRCLE_BUILD_NUM || process.env.TRAVIS_JOB_ID || ''}`
@@ -220,7 +223,7 @@ utils.confirmOnFeatureBranch = callback => {
 utils.getSize = (file, callback) => {
   fs.stat(file, (err, result) => {
     if (err || !result) {
-      console.warn('could not stat', file, 'did you not `npm run build`?')
+      console.warn('could not stat', file, 'did you not `npm run build`? or did you mean to set BUILT_ASSET?')
       return callback(err)
     }
     callback(null, result.size)
@@ -261,7 +264,10 @@ utils.reportSize = (current, previous, callback) => {
 }
 
 utils.build = callback => {
-  if (!process.env.npm_package_scripts_build) return callback()
+  if (!process.env.npm_package_scripts_build) {
+    console.info('there is no npm build script so just exit here')
+    return callback()
+  }
   const file = process.env.BUILT_ASSET || `${utils.distFolder}/${utils.name}.min.js`
   utils.execAndIgnoreOutput('NODE_ENV=production npm run build', err => {
     if (err) return callback(err)
@@ -269,7 +275,7 @@ utils.build = callback => {
       if (err) return callback(err)
       fs.writeFile('.assetSize', size, err => {
         if (err) return callback(err)
-        utils.addFile('.assetSize', callback)
+        utils.addSize(callback)
       })
     })
   })
