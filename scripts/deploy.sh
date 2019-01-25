@@ -9,5 +9,5 @@ if [ ${CI_BRANCH} == 'staging' ]; then
   git diff staging --stat
   git checkout staging
   grep version package.json
-  dist/module/utils.js npm run release
+  BUILT_ASSET=dist/module/utils.js npm run release
 fi
