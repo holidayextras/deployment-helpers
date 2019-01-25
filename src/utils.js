@@ -263,7 +263,10 @@ utils.reportSize = (current, previous, callback) => {
 }
 
 utils.build = callback => {
-  if (!process.env.npm_package_scripts_build) return callback()
+  if (!process.env.npm_package_scripts_build) {
+    console.info('there is no npm build script so just exit here')
+    return callback()
+  }
   const file = process.env.BUILT_ASSET || `${utils.distFolder}/${utils.name}.min.js`
   utils.execAndIgnoreOutput('NODE_ENV=production npm run build', err => {
     if (err) return callback(err)

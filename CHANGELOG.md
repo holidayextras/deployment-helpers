@@ -4,9 +4,7 @@
   - 9475710 :mouse: oops
   - 07a8f70 :thinking: force add dist file
 
-  - 9475710 :mouse: oops
-  - 07a8f70 :thinking: force add dist file
-- vundefined
+- v2.0.0
   - e40a736 :wrench: set email
   - 61be7e4 :wrench: fix git add undefined
   - c4072c2 :wrench: use distfile default
