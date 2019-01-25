@@ -1,6 +1,6 @@
 {
   "name": "deployment-helpers",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "platform": "custom",
   "owner": "tech-foundation",
@@ -21,7 +21,7 @@
     "prerelease": "nodeApps/preRelease.js",
     "release": "nodeApps/release.js",
     "lint": "standard",
-    "ci": "npm run build # required???",
+    "ci": "BUILD_ASSET=dist/module/utils.js npm run build # required???",
     "deploy": "scripts/deploy.sh"
   },
   "babel": {
