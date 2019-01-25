@@ -66,6 +66,10 @@ utils.getEmail = callback => {
 
 utils.setEmail = (email, callback) => {
   if (email) return callback()
+  if (!process.env.GITHUB_EMAIL) {
+    console.info('Our CI expects GITHUB_EMAIL to be set but this may be ok, carrying on...')
+    return callback()
+  }
   const cmd = `git config user.email ${process.env.GITHUB_EMAIL}`
   utils.exec(cmd, () => {
     callback()
@@ -149,16 +153,19 @@ utils.updateChangelog = (notes, callback) => {
   })
 }
 
-utils.addFile = (file, callback) => {
-  if (!file) return callback(new Error('addFile expects a file'))
-  utils.execAndIgnoreOutput(`git add ${file}`, callback)
+utils.addFile = file => {
+  return callback => {
+    if (!file) return callback(new Error('addFile expects a file'))
+    // --force in case the file we are expecting is gitignored
+    utils.execAndIgnoreOutput(`git add --force ${file}`, callback)
+  }
 }
 
-utils.addDist = utils.addFile.bind(null, utils.distFolder)
+utils.addDist = utils.addFile(utils.distFolder)
 
-utils.addChangelog = utils.addFile.bind(null, 'CHANGELOG.md')
+utils.addChangelog = utils.addFile('CHANGELOG.md')
 
-utils.addSize = utils.addFile.bind(null, '.assetSize')
+utils.addSize = utils.addFile('.assetSize')
 
 utils.commitMessageWithCIID = () => {
   return `:robot: Release via CI build ${process.env.CIRCLE_BUILD_NUM || process.env.TRAVIS_JOB_ID || ''}`
@@ -263,7 +270,7 @@ utils.build = callback => {
       if (err) return callback(err)
       fs.writeFile('.assetSize', size, err => {
         if (err) return callback(err)
-        utils.addFile('.assetSize', callback)
+        utils.addSize(callback)
       })
     })
   })

@@ -55,8 +55,8 @@ const updateChangelog = (notes, versionedFile, signature, callback) => {
   })
 }
 
-const addStagingFile = utils.addFile.bind(null, `${distPath}/${name}.staging.min.${version}.js`)
-const addProductionFile = utils.addFile.bind(null, `${distPath}/${name}.min.${version}.js`)
+const addStagingFile = utils.addFile(`${distPath}/${name}.staging.min.${version}.js`)
+const addProductionFile = utils.addFile(`${distPath}/${name}.min.${version}.js`)
 
 async.waterfall([
   utils.checkPrerequisites,

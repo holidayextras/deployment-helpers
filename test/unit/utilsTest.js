@@ -686,7 +686,7 @@ describe('utils', function () {
       sandbox.stub(utils, 'execAndIgnoreOutput').yields()
       sandbox.stub(utils, 'getSize').yields()
       sandbox.stub(fs, 'writeFile').yields()
-      sandbox.stub(utils, 'addFile').yields()
+      sandbox.stub(utils, 'addSize').yields()
       process.env.npm_package_scripts_build = 'BUILD'
     })
 
@@ -740,7 +740,7 @@ describe('utils', function () {
 
     describe('when add file fails', function () {
       beforeEach(function () {
-        utils.addFile.yields('oops')
+        utils.addSize.yields('oops')
         utils.build(callback)
       })
 
@@ -993,7 +993,7 @@ describe('utils', function () {
 
     describe('without a file', function () {
       beforeEach(function () {
-        utils.addFile(null, callback)
+        utils.addFile()(callback)
       })
 
       it('does not execute git cmd', function () {
@@ -1010,7 +1010,7 @@ describe('utils', function () {
 
     describe('with a file', function () {
       beforeEach(function () {
-        utils.addFile('foo', callback)
+        utils.addFile('foo')(callback)
       })
 
       it('executes git cmd', function () {

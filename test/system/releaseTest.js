@@ -31,6 +31,7 @@ describe('release', function () {
           I don't think we normally test things like this, the thing it is
           replacing does not have a test like this.
       */
+      process.env.GITHUB_EMAIL = 'foo@bar.com'
       require('../../nodeApps/release')
       setTimeout(done, 1000)
     })
