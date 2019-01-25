@@ -1,5 +1,11 @@
 # Changelog
 
+- v2.0.1
+  - 9475710 :mouse: oops
+  - 07a8f70 :thinking: force add dist file
+
+  - 9475710 :mouse: oops
+  - 07a8f70 :thinking: force add dist file
 - vundefined
   - e40a736 :wrench: set email
   - 61be7e4 :wrench: fix git add undefined
@@ -49,7 +55,6 @@
   - e6babf4 :mouse: added comment
   - 749ba73 :wrench: remove markup from commit message
   - 4560df3 :construction: commit dist + update CHANGELOG
- 
 - v1.9.1
   - 62a86c9 Merge pull request #43 from holidayextras/ci-debug
   - fbf12f9 :thinking: debug
