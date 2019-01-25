@@ -1,14 +1,11 @@
 'use strict';
 
-var async = require('async');
 var childProcess = require('child_process');
 var fs = require('fs');
 
 var utils = module.exports = {};
 
 utils.labelPullRequestWithMetricMovement = require('./labelPullRequestWithMetricMovement');
-
-var credentials = '-u "' + process.env.GITHUB_USER + ':' + process.env.GITHUB_API_TOKEN + '"';
 
 utils.version = process.env.npm_package_version;
 utils.versionTag = 'v' + utils.version;
@@ -21,7 +18,7 @@ var repo = ('' + process.env.npm_package_repository_url).split('/');
 /* istanbul ignore else */
 if (repo.pop() === utils.name + '.git') {
   utils.ownerAndName = repo.pop() + '/' + utils.name;
-  console.info('got owner and name', utils.ownerAndName, 'from', process.env.npm_package_repository_url, 'get this from env vars?');
+  // console.info('got owner and name', utils.ownerAndName, 'from', process.env.npm_package_repository_url, 'get this from env vars?')
 }
 
 utils.getIntegrity = function (file, callback) {
@@ -33,6 +30,7 @@ utils.getIntegrity = function (file, callback) {
 
 utils.exec = function (cmd, callback) {
   childProcess.exec(cmd, function (err, stdout, stderr) {
+    if (err || stderr) console.warn(cmd, err, stdout, stderr);
     callback(err, stdout);
   });
 };
@@ -58,8 +56,7 @@ utils.getSignature = function (file, callback) {
 };
 
 utils.checkPrerequisites = function (callback) {
-  if (!utils.name) return callback('ERROR: run this as an npm script');
-  async.waterfall([utils.getEmail, utils.setEmail, utils.getUser, utils.setUser], callback);
+  utils.setEmail(null, callback);
 };
 
 utils.getEmail = function (callback) {
@@ -71,6 +68,11 @@ utils.getEmail = function (callback) {
 
 utils.setEmail = function (email, callback) {
   if (email) return callback();
+  /* istanbul ignore next */
+  if (!process.env.GITHUB_EMAIL) {
+    console.info('Our CI expects GITHUB_EMAIL to be set but this may be ok, carrying on...');
+    return callback();
+  }
   var cmd = 'git config user.email ' + process.env.GITHUB_EMAIL;
   utils.exec(cmd, function () {
     callback();
@@ -107,11 +109,11 @@ utils.checkBranch = function (releaseBranch, callback) {
 };
 
 utils.checkAlreadyReleased = function (callback) {
-  var cmd = 'git tag --list | grep -E \'^v[0-9]+.[0-9]+.[0-9]+$\' | sort | tail -n 1';
-  utils.exec(cmd, function (err, tag) {
+  var cmd = 'git tag --list';
+  utils.exec(cmd, function (err, tags) {
     if (err) return callback(err);
-    tag = ('' + tag).trim();
-    if (tag === utils.versionTag) return callback('already released ' + utils.version + ' - please \u2B06\uFE0F  your version');
+    tags = ('' + tags).split(/\n/);
+    if (tags.includes(utils.versionTag)) return callback('already released ' + utils.version + ' - please \u2B06\uFE0F  your version');
     callback();
   });
 };
@@ -128,24 +130,23 @@ utils.getCommitMessagesSinceLastRelease = function (callback) {
 utils.commit = function (callback) {
   var message = utils.commitMessageWithCIID() + ' [skip ci]';
   utils.exec('git commit -m \'' + message + '\'', function (err, stdout, stderr) {
-    console.log('committed, got', err, stdout, stderr); // debug while this is silently failing
     callback(err);
   });
 };
 
 utils.push = function (callback) {
   utils.exec('git config --global push.default matching; git push', function (err, stdout, stderr) {
-    console.log('pushed, got', err, stdout, stderr); // debug while this is silently failing
     callback(err);
   });
 };
 
 // relies on something like # changelog being in the CHANGELOG already
 utils.updateChangelog = function (notes, callback) {
-  fs.readFile('CHANGELOG.md', 'utf-8', function (readErr, contents) {
-    if (readErr) return callback(readErr);
+  fs.readFile('CHANGELOG.md', 'utf-8', function (ignoredError) {
+    var contents = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+
     var existingLines = new RegExp('.*' + utils.versionTag + '.*', 'g');
-    var newContents = contents.replace(existingLines, '').replace(/\n\s*\n/g, '\n').replace(/# Changelog/gi, '# Changelog \n\n- ' + utils.versionTag + notes);
+    var newContents = contents.replace(existingLines, '').replace(/\n\s*\n/g, '\n').replace(/# Changelog/gi, '').replace(/^/, '# Changelog\n\n- ' + utils.versionTag + notes);
     fs.writeFile('CHANGELOG.md', newContents, function (writeErr) {
       if (writeErr) return callback(writeErr);
       callback();
@@ -153,19 +154,22 @@ utils.updateChangelog = function (notes, callback) {
   });
 };
 
-utils.addFile = function (file, callback) {
-  utils.exec('git add ' + file, function (err, stdout, stderr) {
-    console.log('added', file, 'got', err, stdout, stderr); // debug while this is silently failing
-    callback(err);
-  });
+utils.addFile = function (file) {
+  return function (callback) {
+    if (!file) return callback(new Error('addFile expects a file'));
+    // --force in case the file we are expecting is gitignored
+    utils.execAndIgnoreOutput('git add --force ' + file, callback);
+  };
 };
 
-utils.addDist = utils.addFile.bind(null, 'dist');
+utils.addDist = utils.addFile(utils.distFolder);
 
-utils.addChangelog = utils.addFile.bind(null, 'CHANGELOG.md');
+utils.addChangelog = utils.addFile('CHANGELOG.md');
+
+utils.addSize = utils.addFile('.assetSize');
 
 utils.commitMessageWithCIID = function () {
-  return ':airplane: Release via CI build ' + (process.env.CIRCLE_BUILD_NUM || process.env.TRAVIS_JOB_ID || '');
+  return ':robot: Release via CI build ' + (process.env.CIRCLE_BUILD_NUM || process.env.TRAVIS_JOB_ID || '');
 };
 
 utils.commitMessageWithCILinks = function () {
@@ -184,20 +188,8 @@ utils.tagVersion = function (tag, notes, callback) {
   utils.exec('git rev-parse HEAD', function (err, sha) {
     if (err) return callback(err);
     var body = [message, notes].join('\n').replace(/"/g, '');
-    var release = {
-      tag_name: tag,
-      target_commitish: ('' + sha).trim(),
-      name: tag,
-      body: body,
-      draft: false,
-      prerelease: false
-    };
-    var releaseJSON = JSON.stringify(release).replace(/'/g, '');
-    var cmd = 'curl ' + credentials + ' --data \'' + releaseJSON + '\' https://api.github.com/repos/' + utils.ownerAndName + '/releases';
-    utils.exec(cmd, function (err) {
-      if (err) console.warn(err);
-      callback();
-    });
+    var cmd = 'git tag -a ' + tag + ' -m "' + body + '" ' + ('' + sha).trim() + '; git push origin ' + tag;
+    utils.execAndIgnoreOutput(cmd, callback);
   });
 };
 
@@ -206,10 +198,9 @@ utils.tagMajorVersion = utils.tagVersion.bind(utils, utils.majorVersionTag, '');
 utils.tagMinorVersion = utils.tagVersion.bind(utils, utils.minorVersionTag, '');
 
 utils.deleteTag = function (tag, callback) {
-  var cmd = 'curl ' + credentials + ' -X DELETE https://api.github.com/repos/' + utils.ownerAndName + '/git/refs/tags/' + tag;
-  utils.exec(cmd, function (err) {
-    if (err) console.warn(cmd, err);
-    // may not exist so just call back
+  var cmd = 'git tag -d ' + tag + '; git push origin :refs/tags/' + tag;
+  utils.exec(cmd, function (ignoredErr) {
+    // may not exist so just call back - we are console.warning the error inside utils.exec()
     callback();
   });
 };
@@ -231,7 +222,7 @@ utils.confirmOnFeatureBranch = function (callback) {
 utils.getSize = function (file, callback) {
   fs.stat(file, function (err, result) {
     if (err || !result) {
-      console.warn('could not stat', file, 'did you not `npm run build`?');
+      console.warn('could not stat', file, 'did you not `npm run build`? or did you mean to set BUILT_ASSET?');
       return callback(err);
     }
     callback(null, result.size);
@@ -273,7 +264,21 @@ utils.reportSize = function (current, previous, callback) {
 
 utils.build = function (callback) {
   if (!process.env.npm_package_scripts_build) return callback();
-  utils.execAndIgnoreOutput('NODE_ENV=production npm run build', callback);
+  var file = process.env.BUILT_ASSET || utils.distFolder + '/' + utils.name + '.min.js';
+  utils.execAndIgnoreOutput('NODE_ENV=production npm run build', function (err) {
+    if (err) return callback(err);
+    utils.getSize(file, function (err, size) {
+      if (err) return callback(err);
+      fs.writeFile('.assetSize', size, function (err) {
+        if (err) return callback(err);
+        utils.addSize(callback);
+      });
+    });
+  });
+};
+
+utils.getPreviousSize = function (callback) {
+  fs.readFile('.assetSize', 'utf-8', callback);
 };
 
 utils.getBuiltSizeOfBranch = function (branch, callback) {
@@ -288,11 +293,8 @@ utils.getBuiltSizeOfBranch = function (branch, callback) {
 utils.getBuiltAssetStats = function (callback) {
   utils.getBranch(function (err, branch) {
     if (err) return callback(err);
-    utils.getBuiltSizeOfBranch('master', function (err, previousSize) {
-      if (err) {
-        console.error('We cannot get the size of master; did we do a shallow clone?');
-        return callback(err);
-      }
+    utils.getPreviousSize(function (err, previousSize) {
+      if (err) return callback();
       utils.getBuiltSizeOfBranch(branch, function (err, size) {
         if (err) return callback(err);
         utils.reportSize(size, previousSize, callback);
