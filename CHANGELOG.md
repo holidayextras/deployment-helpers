@@ -1,9 +1,15 @@
 # Changelog
 
+- v2.0.5
+  - 795445e :female_detective: another debug build
+  - ba37235 :female_detective: another debug build
+  - 1956487 :female_detective: another debug build
+  - 777ec6b :female_detective: debug build
+  - 4b7088d :truck: move build to ci
+
 - v2.0.1
   - 9475710 :mouse: oops
   - 07a8f70 :thinking: force add dist file
-
 - v2.0.0
   - e40a736 :wrench: set email
   - 61be7e4 :wrench: fix git add undefined
