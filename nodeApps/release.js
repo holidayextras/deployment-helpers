@@ -2,7 +2,7 @@
 
 const async = require('async')
 const utils = require('../src/utils')
-const releaseBranch = process.env.RELEASE_BRANCH || 'master'
+const releaseBranch = process.env.RELEASE_BRANCH || 'staging'
 
 async.waterfall([
   utils.checkPrerequisites,
