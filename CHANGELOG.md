@@ -1,9 +1,11 @@
 # Changelog
 
+- v2.0.2
+  - 4b7088d :truck: move build to ci
+
 - v2.0.1
   - 9475710 :mouse: oops
   - 07a8f70 :thinking: force add dist file
-
 - v2.0.0
   - e40a736 :wrench: set email
   - 61be7e4 :wrench: fix git add undefined
