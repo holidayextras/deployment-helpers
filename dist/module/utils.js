@@ -56,7 +56,12 @@ utils.getSignature = function (file, callback) {
 };
 
 utils.checkPrerequisites = function (callback) {
-  utils.setEmail(null, callback);
+  utils.setEmail(null, function (ignoredError) {
+    // setUser is not required for our ci but it is for circle
+    utils.setUser(null, function (ignoredError) {
+      callback();
+    });
+  });
 };
 
 utils.getEmail = function (callback) {
