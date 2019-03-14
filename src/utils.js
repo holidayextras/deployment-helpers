@@ -54,7 +54,12 @@ utils.getSignature = (file, callback) => {
 }
 
 utils.checkPrerequisites = callback => {
-  utils.setEmail(null, callback)
+  utils.setEmail(null, ignoredError => {
+    // setUser is not required for our ci but it is for circle
+    utils.setUser(null, ignoredError => {
+      callback()
+    })
+  })
 }
 
 utils.getEmail = callback => {
