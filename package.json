@@ -1,6 +1,6 @@
 {
   "name": "deployment-helpers",
-  "version": "2.0.5",
+  "version": "2.0.7",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "platform": "custom",
   "owner": "tech-foundation",
@@ -21,7 +21,7 @@
     "prerelease": "nodeApps/preRelease.js",
     "release": "nodeApps/release.js",
     "lint": "standard",
-    "ci": "BUILD_ASSET=dist/module/utils.js npm run build # required???",
+    "ci": "npm run build # required???",
     "deploy": "scripts/deploy.sh"
   },
   "babel": {
@@ -74,7 +74,7 @@
     "chai": "3.5.0",
     "dirty-chai": "1.2.2",
     "mocha": "4.1.0",
-    "nyc": "13.1.0",
+    "nyc": "13.3.0",
     "sinon": "4.5.0",
     "sinon-chai": "2.14.0",
     "standard": "9.0.2"

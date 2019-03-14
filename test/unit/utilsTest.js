@@ -590,7 +590,7 @@ describe('utils', function () {
   describe('reportSize', function () {
     beforeEach(function () {
       sandbox.stub(console, 'info')
-      sandbox.stub(console, 'warn')
+      sandbox.spy(console, 'warn')
     })
 
     describe('when size is sligthly smaller', function () {

@@ -1,12 +1,18 @@
 # Changelog
 
+- v2.0.7
+  - 2a02dc4 :arrow_up: version bump
+  - 1ab9965 :thinking: this test is fine locally but failing on ci
+  - 6f9db02 :wrench: set user for circleci
+
+- v2.0.6
+  - 3641df4 :put_litter_in_its_place: tidy debug
 - v2.0.5
   - 795445e :female_detective: another debug build
   - ba37235 :female_detective: another debug build
   - 1956487 :female_detective: another debug build
   - 777ec6b :female_detective: debug build
   - 4b7088d :truck: move build to ci
-
 - v2.0.1
   - 9475710 :mouse: oops
   - 07a8f70 :thinking: force add dist file
