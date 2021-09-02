@@ -277,7 +277,7 @@ utils.build = callback => {
     if (err) return callback(err)
     utils.getSize(file, (err, size) => {
       if (err) return callback(err)
-      fs.writeFile('.assetSize', size, err => {
+      fs.writeFile('.assetSize', String(size), err => {
         if (err) return callback(err)
         utils.addSize(callback)
       })
