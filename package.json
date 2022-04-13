@@ -65,7 +65,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@octokit/rest": "14.0.9",
-    "async": "2.6.1"
+    "async": "3.2.2"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",
