@@ -12,6 +12,8 @@ utils.minorVersionTag = utils.versionTag.replace(/(\d+\.\d+).+/, '$1-latest')
 utils.name = process.env.npm_package_name
 utils.ownerAndName = `holidayextras/${utils.name}`
 utils.distFolder = process.env.DIST_FOLDER || 'dist'
+utils.buildScript = process.env.npm_package_scripts_dist ? 'dist' : 'build'
+
 const repo = ('' + process.env.npm_package_repository_url).split('/')
 /* istanbul ignore else */
 if (repo.pop() === `${utils.name}.git`) {
@@ -227,7 +229,7 @@ utils.confirmOnFeatureBranch = callback => {
 utils.getSize = (file, callback) => {
   fs.stat(file, (err, result) => {
     if (err || !result) {
-      console.warn('could not stat', file, 'did you not `npm run build`? or did you mean to set BUILT_ASSET?')
+      console.warn('could not stat', file, 'did you not `npm run dist`? or did you mean to set BUILT_ASSET?')
       return callback(err)
     }
     callback(null, result.size)
@@ -268,12 +270,12 @@ utils.reportSize = (current, previous, callback) => {
 }
 
 utils.build = callback => {
-  if (!process.env.npm_package_scripts_build) {
-    console.info('there is no npm build script so just exit here')
+  if (!process.env.npm_package_scripts_build && !process.env.npm_package_scripts_dist) {
+    console.info('there is no npm build or dist script so just exit here')
     return callback()
   }
   const file = process.env.BUILT_ASSET || `${utils.distFolder}/${utils.name}.min.js`
-  utils.execAndIgnoreOutput('NODE_ENV=production npm run build', err => {
+  utils.execAndIgnoreOutput(`NODE_ENV=production npm run ${utils.buildScript}`, err => {
     if (err) return callback(err)
     utils.getSize(file, (err, size) => {
       if (err) return callback(err)
@@ -291,7 +293,7 @@ utils.getPreviousSize = callback => {
 
 utils.getBuiltSizeOfBranch = (branch, callback) => {
   const file = process.env.BUILT_ASSET || `${utils.distFolder}/${utils.name}.min.js`
-  utils.exec(`git checkout ${utils.distFolder} 2> /dev/null; git checkout ${branch} && NODE_ENV=production npm run build > /dev/null`, err => {
+  utils.exec(`git checkout ${utils.distFolder} 2> /dev/null; git checkout ${branch} && NODE_ENV=production npm run ${utils.buildScript} > /dev/null`, err => {
     if (err) return callback(err)
     utils.getSize(file, callback)
   })

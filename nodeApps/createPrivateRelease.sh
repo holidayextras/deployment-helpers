@@ -50,7 +50,9 @@ if [ -d dist ]; then
   git rm dist -fr
 fi
 
-if [ ! -z `npm run | grep '^  build$'` ]; then
+if [ ! -z `npm run | grep '^  dist$'` ]; then
+  npm run dist
+elif [ ! -z `npm run | grep '^  build$'` ]; then
   npm run build
 fi
 
