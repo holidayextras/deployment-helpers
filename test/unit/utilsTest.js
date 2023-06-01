@@ -682,23 +682,57 @@ describe('utils', function () {
   })
 
   describe('build', function () {
+    let buildScriptBackup = utils.buildScript
+
     beforeEach(function () {
       sandbox.stub(utils, 'execAndIgnoreOutput').yields()
       sandbox.stub(utils, 'getSize').yields()
       sandbox.stub(fs, 'writeFile').yields()
       sandbox.stub(utils, 'addSize').yields()
       process.env.npm_package_scripts_build = 'BUILD'
+      process.env.npm_package_scripts_dist = 'DIST'
     })
 
-    describe('when there is no build script', function () {
+    afterEach(function () {
+      utils.buildScript = buildScriptBackup
+    })
+
+    describe('when there is no build or dist script', function () {
       beforeEach(function () {
         delete process.env.npm_package_scripts_build
+        delete process.env.npm_package_scripts_dist
         utils.build(callback)
       })
 
       it('yields', function () {
         expect(callback).to.have.been.calledOnce()
           .and.calledWithExactly()
+      })
+    })
+
+    describe('when there is a build script and no dist script', function () {
+      beforeEach(function (done) {
+        delete process.env.npm_package_scripts_build
+        utils.buildScript = 'build'
+        utils.build(done)
+      })
+
+      it('should use the build script', function () {
+        expect(utils.execAndIgnoreOutput).to.have.been.calledOnce()
+          .and.calledWith('NODE_ENV=production npm run build')
+      })
+    })
+
+    describe('when there is a dist script', function () {
+      beforeEach(function (done) {
+        delete process.env.npm_package_scripts_dist
+        utils.buildScript = 'dist'
+        utils.build(done)
+      })
+
+      it('should use the dist script', function () {
+        expect(utils.execAndIgnoreOutput).to.have.been.calledOnce()
+        .and.calledWith('NODE_ENV=production npm run dist')
       })
     })
 

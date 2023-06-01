@@ -1,6 +1,6 @@
 {
   "name": "deployment-helpers",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "platform": "custom",
   "owner": "tech-foundation",
@@ -14,14 +14,14 @@
     "generate-signed-file": "./nodeApps/generateSignedFile.js"
   },
   "scripts": {
-    "build": "babel src --out-dir dist/module",
+    "dist": "babel src --out-dir dist/module",
     "coverage": "nyc mocha && nyc check-coverage",
     "checksize": "BUILT_ASSET=dist/module/utils.js ./nodeApps/checkBuiltAssetSize.js",
     "test": "npm run lint && npm run coverage",
     "prerelease": "nodeApps/preRelease.js",
     "release": "nodeApps/release.js",
     "lint": "standard",
-    "ci": "npm run build # required???",
+    "ci": "npm run dist # required???",
     "deploy": "scripts/deploy.sh"
   },
   "babel": {
