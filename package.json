@@ -1,6 +1,6 @@
 {
   "name": "deployment-helpers",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "platform": "custom",
   "owner": "tech-foundation",
@@ -65,7 +65,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@octokit/rest": "14.0.9",
-    "async": "2.6.1"
+    "async": "2.6.4"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",
