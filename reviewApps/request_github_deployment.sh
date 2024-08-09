@@ -15,4 +15,4 @@ if [ "$DEPLOYMENT_ID" == "undefined" ]; then
   exit 1;
 fi
 
-echo $DEPLOYMENT_ID;
+echo $(($DEPLOYMENT_ID+0));
