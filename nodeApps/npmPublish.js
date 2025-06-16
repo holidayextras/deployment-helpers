@@ -49,7 +49,7 @@ publish.checkPackage = async (packageJson) => {
       await publish.publishPackage(packageJson)
     } else {
       console.log('publish.checkPackage has an error:', error)
-      return reject(error)
+      throw error
     }
     console.error('Error checking package', error)
   }
@@ -58,7 +58,7 @@ publish.checkPackage = async (packageJson) => {
 publish.publishPackage = async (packageJson) => {
   const { name, version } = packageJson
   console.log('Publishing package', name, version)
-  childProcess.execSync('npm publish', { stdio: [0, 1, 2] })
+  childProcess.execSync('npm publish --access=restricted', { stdio: [0, 1, 2] })
 }
 
 (async () => {
