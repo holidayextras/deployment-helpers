@@ -1,6 +1,6 @@
 {
   "name": "deployment-helpers",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "platform": "custom",
   "owner": "tech-foundation",
@@ -11,7 +11,8 @@
     "create-private-release": "./nodeApps/createPrivateRelease.sh",
     "release": "./nodeApps/release.js",
     "prerelease": "./nodeApps/preRelease.js",
-    "generate-signed-file": "./nodeApps/generateSignedFile.js"
+    "generate-signed-file": "./nodeApps/generateSignedFile.js",
+    "npm-publish": "./nodeApps/npmPublish.js"
   },
   "scripts": {
     "build": "babel src --out-dir dist/module",
@@ -65,7 +66,9 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@octokit/rest": "14.0.9",
-    "async": "2.6.4"
+    "async": "2.6.4",
+    "axios": "1.10.0",
+    "npm-registry-fetch": "18.0.2"
   },
   "devDependencies": {
     "babel-cli": "6.26.0",
