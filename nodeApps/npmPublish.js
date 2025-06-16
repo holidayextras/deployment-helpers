@@ -58,8 +58,7 @@ publish.checkPackage = async (packageJson) => {
 publish.publishPackage = async (packageJson) => {
   const { name, version } = packageJson
   console.log('Publishing package', name, version)
-  childProcess.execSync('rm -f package-lock.json && rm -rf node_modules && npm i', { stdio: [0, 1, 2] })
-  childProcess.execSync('npm publish --dry-run', { stdio: [0, 1, 2] })
+  childProcess.execSync('npm publish', { stdio: [0, 1, 2] })
 }
 
 (async () => {
