@@ -13,8 +13,8 @@ publish.localDir = () => {
 
 publish.run = async () => {
   try {
-    if (!process.env.NPM_TOKEN) {
-      console.warn('NPM_TOKEN is not set, skipping')
+    if (!process.env.GITHUB_PACKAGE_TOKEN) {
+      console.warn('GITHUB_PACKAGE_TOKEN is not set, skipping')
       return process.exit(1)
     }
     const dir = publish.localDir()
@@ -35,7 +35,7 @@ publish.checkPackage = async (packageJson) => {
   try {
     console.log('Checking package for', name, version)
     const response = await npmFetch.json(`${encodeURIComponent(name)}`, {
-      '//registry.npmjs.org/:_authToken': process.env.NPM_TOKEN
+      '//registry.npmjs.org/:_authToken': process.env.GITHUB_PACKAGE_TOKEN
     })
 
     if (semver.valid(response?.['dist-tags']?.latest) && semver.valid(version) && semver.eq(version, response?.['dist-tags']?.latest)) {
@@ -43,7 +43,6 @@ publish.checkPackage = async (packageJson) => {
       return
     }
     await publish.publishPackage(packageJson)
-
   } catch (error) {
     if (error.statusCode === 404) {
       await publish.publishPackage(packageJson)
