@@ -13,7 +13,7 @@ const checkAlreadyVersioned = callback => {
   const file = `${distPath}/${name}.min.${version}.js`
   const fullPath = path.resolve(file)
   if (fs.existsSync(fullPath)) {
-    return callback(`Already exported ${file}`)
+    return callback(`Already exported ${file}`)// eslint-disable-line n/no-callback-literal
   }
   callback()
 }

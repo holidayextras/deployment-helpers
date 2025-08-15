@@ -1,0 +1,8 @@
+{
+  "recursive": true,
+  "exit": true,
+  "reporter": "spec",
+  "require": [
+    "test/helpers.js"
+  ]
+}
