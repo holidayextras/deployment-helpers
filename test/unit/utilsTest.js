@@ -677,7 +677,7 @@ describe('utils', function () {
 
     it('commits', function () {
       expect(utils.exec).to.have.been.calledOnce()
-        .and.calledWith(`git commit -m 'MESSAGE [skip ci]'`)
+        .and.calledWith('git commit -m \'MESSAGE [skip ci]\'')
     })
   })
 

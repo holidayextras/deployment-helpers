@@ -40,7 +40,7 @@ utils.execAndIgnoreOutput = (cmd, callback) => {
 }
 
 utils.createVersionedDistFile = (file, callback) => {
-  if (!utils.version) return callback('Version missing - must run this as an npm script')
+  if (!utils.version) return callback('Version missing - must run this as an npm script') // eslint-disable-line n/no-callback-literal
   const versionedFile = file.replace('.js', `.${utils.version}.js`)
   const cmd = `cp ${file} ${versionedFile}`
   utils.exec(cmd, err => {
@@ -106,17 +106,17 @@ utils.getBranch = callback => {
 
 utils.checkBranch = (releaseBranch, callback) => {
   utils.getBranch((unhandledErr, currentBranch) => {
-    if (releaseBranch !== currentBranch) return callback(`skip this on ${currentBranch} (on ${releaseBranch} only)`)
+    if (releaseBranch !== currentBranch) return callback(`skip this on ${currentBranch} (on ${releaseBranch} only)`) // eslint-disable-line n/no-callback-literal
     callback()
   })
 }
 
 utils.checkAlreadyReleased = callback => {
-  const cmd = `git tag --list`
+  const cmd = 'git tag --list'
   utils.exec(cmd, (err, tags) => {
     if (err) return callback(err)
     tags = ('' + tags).split(/\n/)
-    if (tags.includes(utils.versionTag)) return callback(`already released ${utils.version} - please ⬆️  your version`)
+    if (tags.includes(utils.versionTag)) return callback(`already released ${utils.version} - please ⬆️  your version`) // eslint-disable-line n/no-callback-literal
     callback()
   })
 }
@@ -138,7 +138,7 @@ utils.commit = callback => {
 }
 
 utils.push = callback => {
-  utils.exec(`git config --global push.default matching; git push`, (err, stdout, stderr) => {
+  utils.exec('git config --global push.default matching; git push', (err, stdout, stderr) => {
     callback(err)
   })
 }
@@ -178,7 +178,7 @@ utils.commitMessageWithCIID = () => {
 }
 
 utils.commitMessageWithCILinks = () => {
-  let message = utils.commitMessageWithCIID()
+  const message = utils.commitMessageWithCIID()
   if (process.env.CIRCLE_BUILD_NUM) {
     return `${message} https://circleci.com/gh/${utils.ownerAndName}/${process.env.CIRCLE_BUILD_NUM}`
   }
@@ -190,7 +190,7 @@ utils.commitMessageWithCILinks = () => {
 
 utils.tagVersion = (tag, notes, callback) => {
   const message = utils.commitMessageWithCILinks()
-  utils.exec(`git rev-parse HEAD`, (err, sha) => {
+  utils.exec('git rev-parse HEAD', (err, sha) => {
     if (err) return callback(err)
     const body = [message, notes].join('\n').replace(/"/g, '')
     const cmd = `git tag -a ${tag} -m "${body}" ${('' + sha).trim()}; git push origin ${tag}`
@@ -216,9 +216,9 @@ utils.untagMinorVersion = utils.deleteTag.bind(utils, utils.minorVersionTag)
 // is there a better way to check we are no a feature branch?
 utils.confirmOnFeatureBranch = callback => {
   utils.checkBranch('master', err => {
-    if (!err) return callback('skipping this on master branch')
+    if (!err) return callback('skipping this on master branch') // eslint-disable-line n/no-callback-literal
     utils.checkBranch('staging', err => {
-      if (!err) return callback('skipping this on staging branch')
+      if (!err) return callback('skipping this on staging branch') // eslint-disable-line n/no-callback-literal
       callback()
     })
   })

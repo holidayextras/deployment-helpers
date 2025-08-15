@@ -82,17 +82,17 @@ module.exports = options => {
   // the metric increased 20%, it's above both a minor 5% and a major 15%) we want the
   // most relevant one (15%) to be first in the array so it's easy to decide which to
   // use
-  let thresholdMappingToLabelMapping = [ 0, 4, 1, 3, 2 ]
+  const thresholdMappingToLabelMapping = [0, 4, 1, 3, 2]
   let thresholdMapping = [
-    [ -options.majorValueThreshold, -options.majorPercentageThreshold ],
-    [ options.majorValueThreshold, options.majorPercentageThreshold ],
-    [ -options.minorValueThreshold, -options.minorPercentageThreshold ],
-    [ options.minorValueThreshold, options.minorPercentageThreshold ],
-    [ 0, 0 ]
+    [-options.majorValueThreshold, -options.majorPercentageThreshold],
+    [options.majorValueThreshold, options.majorPercentageThreshold],
+    [-options.minorValueThreshold, -options.minorPercentageThreshold],
+    [options.minorValueThreshold, options.minorPercentageThreshold],
+    [0, 0]
   ]
 
   if (options.desirableTrajectory === 'DECREASE') {
-    thresholdMapping = thresholdMapping.map(values => [ -values[0], -values[1] ])
+    thresholdMapping = thresholdMapping.map(values => [-values[0], -values[1]])
   }
 
   const thresholdMappingMatches = thresholdMapping.map(mapping => {
@@ -134,8 +134,8 @@ module.exports = options => {
     }
 
     return removeLabelsPromises.then(() => {
-      const per_page = 100 // eslint-disable-line camelcase
-      return github.issues.getLabels({ owner, repo, per_page })
+      const perPage = 100
+      return github.issues.getLabels({ owner, repo, per_page: perPage })
     }).then(availableLabelsForRepo => {
       return availableLabelsForRepo.data.filter(label => label.name === name)[0]
     }).then(maybeExistingLabel => {

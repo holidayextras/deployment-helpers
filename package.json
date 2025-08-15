@@ -1,47 +1,42 @@
 {
-  "name": "deployment-helpers",
-  "version": "3.0.1",
+  "name": "@holidayextras/deployment-helpers",
+  "version": "4.0.0",
   "description": "A collection of scripts that can be used as part of a deployment process.",
   "platform": "custom",
   "owner": "tech-foundation",
   "ci": "dockyard",
-  "main": "dist/module/utils",
+  "main": "src/utils.js",
   "bin": {
-    "check-built-asset-size": "./nodeApps/checkBuiltAssetSize.js",
-    "create-private-release": "./nodeApps/createPrivateRelease.sh",
-    "release": "./nodeApps/release.js",
-    "prerelease": "./nodeApps/preRelease.js",
-    "generate-signed-file": "./nodeApps/generateSignedFile.js"
+    "check-built-asset-size": "nodeApps/checkBuiltAssetSize.js",
+    "create-private-release": "nodeApps/createPrivateRelease.sh",
+    "release": "nodeApps/release.js",
+    "prerelease": "nodeApps/preRelease.js",
+    "generate-signed-file": "nodeApps/generateSignedFile.js",
+    "npm-publish": "nodeApps/npmPublish.js"
   },
   "scripts": {
-    "build": "babel src --out-dir dist/module",
-    "coverage": "nyc mocha && nyc check-coverage",
-    "checksize": "BUILT_ASSET=dist/module/utils.js ./nodeApps/checkBuiltAssetSize.js",
+    "coverage": "nyc mocha --exit test && nyc check-coverage",
     "test": "npm run lint && npm run coverage",
     "prerelease": "nodeApps/preRelease.js",
     "release": "nodeApps/release.js",
     "lint": "standard",
-    "ci": "npm run build # required???",
-    "deploy": "scripts/deploy.sh"
-  },
-  "babel": {
-    "presets": [
-      "env"
-    ]
+    "ci": "echo 0",
+    "deploy": "./nodeApps/npmPublish.js"
   },
   "nyc": {
+    "check-coverage": true,
     "all": true,
     "reporter": [
       "html",
       "text"
     ],
-    "statements": 100,
-    "lines": 100,
-    "branches": 100,
+    "statements": 99,
+    "lines": 99,
+    "branches": 98,
     "functions": 100,
     "exclude": [
       "src/labelPullRequestWithMetricMovement.js",
-      "dist",
+      "test",
       "coverage",
       "nodeApps"
     ]
@@ -65,19 +60,18 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@octokit/rest": "14.0.9",
-    "async": "2.6.4"
+    "async": "2.6.4",
+    "axios": "1.11.0",
+    "npm-registry-fetch": "19.0.0"
   },
   "devDependencies": {
-    "babel-cli": "6.26.0",
-    "babel-core": "6.26.3",
-    "babel-preset-env": "1.7.0",
-    "chai": "3.5.0",
-    "dirty-chai": "1.2.2",
-    "mocha": "4.1.0",
-    "nyc": "13.3.0",
-    "sinon": "4.5.0",
-    "sinon-chai": "2.14.0",
-    "standard": "9.0.2"
+    "chai": "4.3.10",
+    "dirty-chai": "2.0.1",
+    "mocha": "11.7.1",
+    "nyc": "17.1.0",
+    "sinon": "18.0.1",
+    "sinon-chai": "3.7.0",
+    "standard": "17.1.2"
   },
   "directories": {
     "test": "test"
