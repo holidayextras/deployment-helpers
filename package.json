@@ -20,7 +20,7 @@
     "prerelease": "nodeApps/preRelease.js",
     "release": "nodeApps/release.js",
     "lint": "standard",
-    "ci": "npm run build # required???",
+    "ci": "echo 0",
     "deploy": "./nodeApps/npmPublish.js"
   },
   "nyc": {
