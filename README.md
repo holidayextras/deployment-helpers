@@ -55,3 +55,7 @@ Use and configure with package.json:
 ## Releasing to NPM
 
 We currently use a combination of npm version 1 and above, because of this we can not scope the package name in the `package.json`, when a new NPM release is required please add the scope to the package name (`@holidayextras/deployment-helpers`) manually before running `npm publish`.
+
+## What this repository does
+
+Deployment helper toolkit for Node/npm release workflows, GitHub release/PR automation, and AWS deployment scripts for ECS, ECR, CodeDeploy, ELB, and AutoScaling.
